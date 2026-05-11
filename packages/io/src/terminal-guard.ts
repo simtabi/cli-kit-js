@@ -88,10 +88,15 @@ export class TerminalGuard {
       }
     }
 
-    try {
-      this.#stdout.write(RESTORE_SEQ)
-    } catch {
-      // stdout may already be closed (broken pipe).
+    // Only emit terminal-restore escape sequences to a real TTY. Piped
+    // stdout would render them as literal text — exactly the visual junk
+    // the guard is supposed to prevent.
+    if (this.#stdout.isTTY) {
+      try {
+        this.#stdout.write(RESTORE_SEQ)
+      } catch {
+        // stdout may already be closed (broken pipe).
+      }
     }
 
     // Remove the registered listeners so we don't double-fire if the host

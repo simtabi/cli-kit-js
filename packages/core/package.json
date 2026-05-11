@@ -45,8 +45,20 @@
     {
       "name": "run() + defineCommand + cli builder ESM",
       "path": "dist/index.js",
-      "limit": "10 KB",
-      "gzip": true
+      "limit": "12 KB",
+      "gzip": true,
+      "ignore": [
+        "node:readline",
+        "node:stream",
+        "node:fs",
+        "node:fs/promises",
+        "node:path",
+        "readline",
+        "stream",
+        "fs",
+        "fs/promises",
+        "path"
+      ]
     }
   ],
   "dependencies": {

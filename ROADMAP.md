@@ -14,13 +14,18 @@ Local checks. None depend on external services. Run before tagging anything.
 - ✅ **0.2** `pnpm lint` passes (Biome): 172 files, 0 errors.
 - ✅ **0.3** `pnpm typecheck` passes: 23/23 tasks across all packages + apps + docs.
 - ✅ **0.4** `pnpm build` succeeds for every `packages/*`.
-- ✅ **0.5** `pnpm -r test` passes: 392 tests across 9 packages.
-- ⏳ **0.6** `pnpm -r exec -- pnpm exec size-limit` is within every per-package budget. **Deferred** until size-limit's tsup-shipped artefacts have a chance to be exercised in real consumers.
-- ⏳ **0.7** Browser playground runs locally (`pnpm --filter @simtabi/cli-kit-js-playground dev`). Vite build succeeds (`pnpm build`); interactive verification deferred to the operator.
+- ✅ **0.5** `pnpm -r test` passes: 410 tests across 9 packages.
+- ✅ **0.6** `pnpm -r size` passes for every package. 12 size-limit budgets verified — see each package's `size-limit` field. core/io/config configs include `ignore` entries for `node:` builtins (size-limit's bundler can't resolve them, but they don't ship in the runtime artefact).
+- ⏳ **0.7** Browser playground runs locally (`pnpm --filter @simtabi/cli-kit-js-playground dev`). Vite build succeeds; interactive verification deferred to the operator.
 - ⏳ **0.8** Docs site runs locally (`pnpm --filter @simtabi/cli-kit-js-docs dev`). Astro build succeeds with 19 pages indexed and sitemap generated; interactive verification deferred to the operator.
-- ⏳ **0.9** Example Node CLIs run end-to-end. Compiled clean; runtime verification deferred to the operator (requires `node --experimental-strip-types`).
+- ✅ **0.9** Example Node CLIs run end-to-end (verified with `node --experimental-strip-types`):
+  - `hello --help` → clean usage screen with options + examples.
+  - `hello -n Claude --shout -t 3` → 3 lines of `HELLO, CLAUDE!`.
+  - `calc add 5 3` → `8`.
+  - `calc mul 7 6 --verbose` → `7 × 6 = 42`.
+  - `calc ad 5 3` → "Unknown command: ad / Did you mean: add?" then usage.
 
-The four ⏳ items are all "operator-runnable" — they need a human to launch the dev server / interactive process. Everything that can be automated is green.
+The two remaining ⏳ items are "operator-runnable" — they need a human to launch the dev server. The builds already succeed; only the live preview is unverified.
 
 ---
 
@@ -75,7 +80,7 @@ Once 0.1.0 ships, the kit is usable but not yet "best-of-class for v1.0". These 
 
 - ⏳ **2.5** **Logger improvements.** Currently `core` ships a thin logger. Promote it: structured fields, leveled output (silent/error/warn/info/debug/trace), secret-key auto-redaction by pattern match (`password|token|secret|key|authorization`), per-stream output (console vs file via consumer-supplied sink).
 
-- ⏳ **2.6** **Hyperlink rendering (OSC 8).** Most modern terminals render `\x1b]8;;URL\x1b\\TEXT\x1b]8;;\x1b\\` as clickable. Already detected (`capabilities.hyperlinks`). Add `render.link(text, url)` that emits the sequence when capable, falls back to `text (url)` otherwise. URL allowlist: `http`, `https`, `mailto`.
+- ✅ **2.6** **Hyperlink rendering (OSC 8).** `render.link(text, url)` exported from `@simtabi/cli-kit-js-render`. URL scheme allowlist (`http` / `https` / `mailto`); any other scheme falls back to plain `text (url)`. 14 tests + a fast-check invariant proving no OSC 8 link is ever emitted for a disallowed scheme.
 
 - ⏳ **2.7** **Color-blindness / a11y mode.** A `output.theme` config field selecting a high-contrast palette and ASCII symbols fallback. Surfaces through `IOAdapter.capabilities` for renderers to consult.
 

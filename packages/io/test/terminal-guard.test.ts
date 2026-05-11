@@ -97,4 +97,18 @@ describe('TerminalGuard', () => {
     // No raw-mode toggle when not a TTY
     expect(setRaw).not.toHaveBeenCalled()
   })
+
+  it('emits no escape sequences when stdout is not a TTY', () => {
+    // Piped stdout would render the restore sequence as literal text —
+    // exactly the visual junk the guard is supposed to prevent.
+    const stdout = fakeStdout(false)
+    const stdin = fakeStdin()
+    const g = new TerminalGuard({
+      stdout: stdout as unknown as NodeJS.WriteStream,
+      stdin: stdin as unknown as NodeJS.ReadStream,
+    })
+    g.install()
+    g.restore()
+    expect(stdout.writes.join('')).toBe('')
+  })
 })

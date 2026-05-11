@@ -63,10 +63,11 @@
   },
   "size-limit": [
     {
-      "name": "IOAdapter + adapters ESM",
+      "name": "IOAdapter + Node adapter ESM",
       "path": "dist/index.js",
       "limit": "5 KB",
-      "gzip": true
+      "gzip": true,
+      "ignore": ["node:readline", "node:stream", "readline", "stream"]
     },
     {
       "name": "DOM adapter ESM",

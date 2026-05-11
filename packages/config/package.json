@@ -46,7 +46,8 @@
       "name": "createConfig ESM",
       "path": "dist/index.js",
       "limit": "6 KB",
-      "gzip": true
+      "gzip": true,
+      "ignore": ["node:fs", "node:fs/promises", "node:path", "fs", "fs/promises", "path"]
     }
   ],
   "dependencies": {},

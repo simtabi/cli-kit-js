@@ -9,6 +9,7 @@
 
 export { banner } from './banner'
 export { box, statusBox } from './box'
+export { link, sanitizeUrl, type LinkOptions } from './link'
 export { list } from './list'
 export { progressBar } from './progress'
 export { createSpinner } from './spinner'

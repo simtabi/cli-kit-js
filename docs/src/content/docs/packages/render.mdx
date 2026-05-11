@@ -39,6 +39,21 @@ console.log(progressBar(50, 100, { width: 30, label: 'Loading' }))
 
 Five box styles: `single`, `double`, `round`, `bold`, `ascii`. Tree falls back to ASCII (`+--`, `|`, `\`--') via `{ ascii: true }`.
 
+## Terminal hyperlinks (OSC 8)
+
+```ts
+import { link } from '@simtabi/cli-kit-js-render'
+
+io.write(`Read the ${link('docs', 'https://cli-kit-js.pages.dev')}\n`)
+io.write(`Email ${link('me', 'mailto:hi@example.com')}\n`)
+```
+
+Modern terminals (iTerm2, WezTerm, GNOME Terminal 3.26+, Windows Terminal 1.4+, Konsole 20.12+, VS Code's integrated terminal) render this as a clickable link. Older terminals show the link text unchanged.
+
+**URL scheme allowlist:** `http`, `https`, `mailto`. Any other scheme (`javascript:`, `data:`, `vbscript:`, `file:`, …) falls back to the plain `text (url)` form — the URL never becomes an active hyperlink.
+
+When you know the terminal doesn't support hyperlinks (e.g. piped output, CI logs), pass `{ hyperlinks: false }` to force the plain form.
+
 ## Spinner
 
 ```ts
