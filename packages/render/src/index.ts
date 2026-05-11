@@ -1,19 +1,33 @@
 /**
  * `@simtabi/cli-kit-js-render`
  *
- * Composable, width-safe renderers that emit strings via an IOAdapter:
+ * Composable, width-safe renderers. Pure functions return strings; the
+ * stateful `createSpinner` writes through an `IOAdapter`.
  *
- *   - box(text, opts)          — bordered box
- *   - table(headers, rows)     — column-aligned table
- *   - list(items, opts)        — bulleted / numbered / nested
- *   - tree(nodes, opts)        — file-tree style
- *   - banner(text, opts)       — title block
- *   - progressBar(state)       — single-line progress
- *   - spinner(text)            — async spinner controller
- *
- * Subpath `/html` ships the ANSI → HTML converter (XSS-safe).
- *
- * Implementation lands in M4.
+ * Subpath: `@simtabi/cli-kit-js-render/html` exports the ANSI→HTML converter.
  */
 
-export const __version = '0.0.0'
+export { banner } from './banner'
+export { box, statusBox } from './box'
+export { list } from './list'
+export { progressBar } from './progress'
+export { createSpinner } from './spinner'
+export { table } from './table'
+export { tree } from './tree'
+
+export type {
+  Align,
+  AnsiHtmlOptions,
+  BannerOptions,
+  BoxOptions,
+  BoxStyle,
+  ListItem,
+  ListOptions,
+  ProgressBarOptions,
+  SpinnerController,
+  SpinnerOptions,
+  SpinnerStyle,
+  TableOptions,
+  TreeNode,
+  TreeOptions,
+} from './types'
