@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { detectColorDepth, detectHyperlinks, detectUnicode } from '../src/index'
+import {
+  detectColorDepth,
+  detectCursorMoves,
+  detectHyperlinks,
+  detectUnicode,
+} from '../src/index'
 
 describe('detectColorDepth', () => {
   it('returns 0 when CLIKIT_DETERMINISTIC=1', () => {
@@ -82,6 +87,23 @@ describe('detectUnicode', () => {
 
   it('defaults true on win32', () => {
     expect(detectUnicode({ env: {}, platform: 'win32' })).toBe(true)
+  })
+})
+
+describe('detectCursorMoves', () => {
+  it('true on Node TTY', () => {
+    expect(detectCursorMoves({ env: {}, isTTY: true, platform: 'linux' })).toBe(true)
+  })
+  it('false on non-TTY', () => {
+    expect(detectCursorMoves({ env: {}, isTTY: false, platform: 'linux' })).toBe(false)
+  })
+  it('false in browser even when isTTY claims true', () => {
+    expect(detectCursorMoves({ env: {}, isTTY: true, platform: 'browser' })).toBe(false)
+  })
+  it('false under CLIKIT_DETERMINISTIC', () => {
+    expect(
+      detectCursorMoves({ env: { CLIKIT_DETERMINISTIC: '1' }, isTTY: true, platform: 'linux' }),
+    ).toBe(false)
   })
 })
 

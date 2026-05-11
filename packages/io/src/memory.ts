@@ -12,6 +12,8 @@ export interface MemoryAdapterOptions {
   readonly isTTY?: boolean
   readonly color?: ColorDepth
   readonly unicode?: boolean
+  /** Override; defaults to `isTTY`. Tests for DOM-like behaviour set false explicitly. */
+  readonly cursorMoves?: boolean
 }
 
 class AbortError extends Error {
@@ -35,6 +37,7 @@ export class MemoryAdapter implements IOAdapter {
   #isTTY: boolean
   #color: ColorDepth
   #unicode: boolean
+  #cursorMoves: boolean | undefined
 
   readonly #keyQueue: KeyEvent[] = []
   readonly #lineQueue: string[] = []
@@ -45,6 +48,7 @@ export class MemoryAdapter implements IOAdapter {
     this.#rows = opts.rows ?? 24
     this.#isTTY = opts.isTTY ?? false
     this.#color = opts.color ?? (opts.isTTY ? 24 : 0)
+    this.#cursorMoves = opts.cursorMoves
     this.#unicode = opts.unicode ?? true
   }
 
@@ -87,6 +91,7 @@ export class MemoryAdapter implements IOAdapter {
       color: this.#color,
       unicode: this.#unicode,
       hyperlinks: false,
+      cursorMoves: this.#cursorMoves ?? this.#isTTY,
       stream: 'stdout',
     }
   }

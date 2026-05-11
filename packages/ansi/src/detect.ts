@@ -130,6 +130,23 @@ export function detectCapabilities(opts: DetectEnv = currentEnv()): Capabilities
     color: detectColorDepth(opts),
     unicode: detectUnicode(opts),
     hyperlinks: detectHyperlinks(opts),
+    cursorMoves: detectCursorMoves(opts),
     stream: 'stdout',
   }
+}
+
+/**
+ * Whether the output stream honours ANSI cursor-movement escapes.
+ *
+ * Conservative default: only Node TTYs and `FORCE_COLOR`-style forced
+ * environments report true. Browser DOM / DevTools render escapes as text
+ * and must opt out of cursor-based rendering.
+ */
+export function detectCursorMoves(opts: DetectEnv = currentEnv()): boolean {
+  const env = opts.env ?? {}
+  if (env.CLIKIT_DETERMINISTIC === '1') return false
+  const isTTY = opts.isTTY ?? false
+  const platform = opts.platform ?? 'unknown'
+  if (platform === 'browser') return false
+  return isTTY
 }

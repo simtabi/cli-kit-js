@@ -21,6 +21,16 @@ export interface Capabilities {
   readonly color: ColorDepth
   readonly unicode: boolean
   readonly hyperlinks: boolean
+  /**
+   * Whether the renderer honours ANSI cursor-movement escapes (`\x1b[…A/B/C/D`,
+   * DECSC/DECRC, erase-line, erase-display, cursor-position). True for real
+   * TTYs, false for the DOM and DevTools adapters where those bytes would
+   * render as text rather than move a cursor.
+   *
+   * Consumers that draw in-place (spinners, prompts, progress bars) should
+   * use append-only rendering when this is false.
+   */
+  readonly cursorMoves: boolean
   readonly stream: 'stdout' | 'stderr' | 'unknown'
 }
 

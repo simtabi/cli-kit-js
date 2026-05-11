@@ -205,6 +205,8 @@ class ConsoleAdapter implements IOAdapter {
       color: opts.capabilities?.color ?? 24,
       unicode: opts.capabilities?.unicode ?? true,
       hyperlinks: opts.capabilities?.hyperlinks ?? false,
+      // DevTools console doesn't honour cursor moves either.
+      cursorMoves: opts.capabilities?.cursorMoves ?? false,
       stream: 'stdout',
     }
   }

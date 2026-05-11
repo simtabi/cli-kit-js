@@ -14,6 +14,9 @@ export { password } from './password'
 export { select } from './select'
 export { text } from './text'
 
+// SecureString is exported for consumers writing custom credential prompts.
+export { SecureString } from './secure-string'
+
 export {
   PromptCancelledError,
   type ConfirmPromptOptions,

@@ -8,6 +8,7 @@
 export {
   detectCapabilities,
   detectColorDepth,
+  detectCursorMoves,
   detectHyperlinks,
   detectUnicode,
 } from './detect'

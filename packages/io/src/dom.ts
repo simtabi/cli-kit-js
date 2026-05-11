@@ -268,6 +268,8 @@ class DomAdapter implements IOAdapter {
       color: opts.capabilities?.color ?? 24,
       unicode: opts.capabilities?.unicode ?? base.unicode,
       hyperlinks: opts.capabilities?.hyperlinks ?? false,
+      // DOM doesn't honour ANSI cursor-move escapes — they'd render as text.
+      cursorMoves: opts.capabilities?.cursorMoves ?? false,
       stream: 'stdout',
     }
   }
