@@ -1,0 +1,22 @@
+{
+  "name": "@simtabi/cli-kit-js-examples",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Node example CLIs built with cli-kit-js. Not published.",
+  "license": "MIT",
+  "type": "module",
+  "engines": { "node": ">=22.0.0" },
+  "scripts": {
+    "build": "echo 'examples have no build step'",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'no tests yet'",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@simtabi/cli-kit-js": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

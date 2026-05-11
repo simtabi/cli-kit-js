@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal CLI - Browser Demo</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #569cd6;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #808080;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #commandInput {
+            flex: 1;
+            padding: 12px 15px;
+            font-family: inherit;
+            font-size: 14px;
+            background: #2d2d2d;
+            border: 1px solid #404040;
+            color: #d4d4d4;
+            border-radius: 4px;
+        }
+        #commandInput:focus {
+            outline: none;
+            border-color: #569cd6;
+        }
+        button {
+            padding: 12px 24px;
+            font-family: inherit;
+            font-size: 14px;
+            background: #0e639c;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+        .output {
+            background: #0d0d0d;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 15px;
+            min-height: 400px;
+            white-space: pre-wrap;
+            font-size: 13px;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+        .prompt {
+            color: #4ec9b0;
+        }
+        .examples {
+            margin-top: 20px;
+            padding: 15px;
+            background: #252526;
+            border-radius: 4px;
+        }
+        .examples h3 {
+            margin-top: 0;
+            color: #dcdcaa;
+        }
+        .example-cmd {
+            display: inline-block;
+            background: #333;
+            padding: 4px 8px;
+            margin: 3px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .example-cmd:hover {
+            background: #444;
+        }
+        /* ANSI color support */
+        .ansi-black { color: #000000; }
+        .ansi-red { color: #cd3131; }
+        .ansi-green { color: #0dbc79; }
+        .ansi-yellow { color: #e5e510; }
+        .ansi-blue { color: #2472c8; }
+        .ansi-magenta { color: #bc3fbc; }
+        .ansi-cyan { color: #11a8cd; }
+        .ansi-white { color: #e5e5e5; }
+        .ansi-bright-red { color: #f14c4c; }
+        .ansi-bright-green { color: #23d18b; }
+        .ansi-bright-yellow { color: #f5f543; }
+        .ansi-bright-blue { color: #3b8eea; }
+        .ansi-bright-magenta { color: #d670d6; }
+        .ansi-bright-cyan { color: #29b8db; }
+        .ansi-bright-white { color: #ffffff; }
+        .ansi-bold { font-weight: bold; }
+        .ansi-dim { opacity: 0.7; }
+        .ansi-italic { font-style: italic; }
+        .ansi-underline { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖥️ Universal CLI - Browser Demo</h1>
+        <p class="subtitle">A pure JavaScript CLI library that works in Node.js, Browser, and Puter</p>
+        
+        <div class="input-area">
+            <input type="text" id="commandInput" placeholder="Enter command (e.g., greet --name World --friendly)" />
+            <button onclick="executeCommand()">Run</button>
+        </div>
+        
+        <div class="output" id="output"><span class="prompt">$</span> Type a command and press Run or Enter...</div>
+        
+        <div class="examples">
+            <h3>Example Commands:</h3>
+            <span class="example-cmd" onclick="runExample('--help')">--help</span>
+            <span class="example-cmd" onclick="runExample('greet --name Claude --friendly')">greet --name Claude --friendly</span>
+            <span class="example-cmd" onclick="runExample('greet -n World -t 3')">greet -n World -t 3</span>
+            <span class="example-cmd" onclick="runExample('calc add 10 5')">calc add 10 5</span>
+            <span class="example-cmd" onclick="runExample('calc sub 100 42')">calc sub 100 42</span>
+            <span class="example-cmd" onclick="runExample('calc mul 7 8')">calc mul 7 8</span>
+            <span class="example-cmd" onclick="runExample('demo colors')">demo colors</span>
+            <span class="example-cmd" onclick="runExample('demo box')">demo box</span>
+            <span class="example-cmd" onclick="runExample('demo table')">demo table</span>
+            <span class="example-cmd" onclick="runExample('demo progress')">demo progress</span>
+        </div>
+    </div>
+
+    <script src="universal-cli.js"></script>
+    <script>
+        // Get CLI instance
+        const cli = window.UniversalCLI;
+        const { defineCommand, runCommand, colors: c, format, progress, symbols } = cli;
+        
+        // Output element
+        const outputEl = document.getElementById('output');
+        const inputEl = document.getElementById('commandInput');
+        
+        // ANSI to HTML converter
+        function ansiToHtml(str) {
+            const ansiMap = {
+                '0': '</span>',
+                '1': '<span class="ansi-bold">',
+                '2': '<span class="ansi-dim">',
+                '3': '<span class="ansi-italic">',
+                '4': '<span class="ansi-underline">',
+                '22': '</span>',
+                '23': '</span>',
+                '24': '</span>',
+                '30': '<span class="ansi-black">',
+                '31': '<span class="ansi-red">',
+                '32': '<span class="ansi-green">',
+                '33': '<span class="ansi-yellow">',
+                '34': '<span class="ansi-blue">',
+                '35': '<span class="ansi-magenta">',
+                '36': '<span class="ansi-cyan">',
+                '37': '<span class="ansi-white">',
+                '39': '</span>',
+                '90': '<span class="ansi-bright-black">',
+                '91': '<span class="ansi-bright-red">',
+                '92': '<span class="ansi-bright-green">',
+                '93': '<span class="ansi-bright-yellow">',
+                '94': '<span class="ansi-bright-blue">',
+                '95': '<span class="ansi-bright-magenta">',
+                '96': '<span class="ansi-bright-cyan">',
+                '97': '<span class="ansi-bright-white">'
+            };
+            
+            return str.replace(/\x1b\[([0-9;]+)m/g, (match, codes) => {
+                return codes.split(';').map(code => ansiMap[code] || '').join('');
+            });
+        }
+        
+        // Custom output handler for browser
+        let outputBuffer = [];
+        
+        function writeLine(str) {
+            outputBuffer.push(str);
+        }
+        
+        function flushOutput() {
+            const html = outputBuffer.map(line => ansiToHtml(line)).join('\n');
+            outputEl.innerHTML = html;
+            outputBuffer = [];
+        }
+        
+        // Override console.log for demo
+        const originalLog = console.log;
+        
+        // Define commands (same structure as Node.js example)
+        const greetCommand = defineCommand({
+            meta: {
+                name: 'greet',
+                description: 'Greet someone'
+            },
+            args: {
+                name: { type: 'string', alias: 'n', description: 'Name to greet', default: 'World' },
+                friendly: { type: 'boolean', alias: 'f', description: 'Use friendly greeting' },
+                times: { type: 'string', alias: 't', description: 'Times to greet', default: '1' }
+            },
+            run({ args }) {
+                const greeting = args.friendly ? 'Hi' : 'Hello';
+                const times = parseInt(args.times, 10);
+                
+                for (let i = 0; i < times; i++) {
+                    writeLine(c.green(`${greeting}, ${args.name}!`));
+                }
+            }
+        });
+        
+        const calcCommand = defineCommand({
+            meta: { name: 'calc', description: 'Simple calculator' },
+            subCommands: {
+                add: defineCommand({
+                    meta: { name: 'add', description: 'Add numbers' },
+                    args: {
+                        a: { type: 'positional', required: true },
+                        b: { type: 'positional', required: true }
+                    },
+                    run({ args }) {
+                        const result = parseFloat(args.a) + parseFloat(args.b);
+                        writeLine(c.cyan(`${args.a} + ${args.b} = `) + c.bold(c.yellow(String(result))));
+                    }
+                }),
+                sub: defineCommand({
+                    meta: { name: 'sub', description: 'Subtract numbers' },
+                    args: {
+                        a: { type: 'positional', required: true },
+                        b: { type: 'positional', required: true }
+                    },
+                    run({ args }) {
+                        const result = parseFloat(args.a) - parseFloat(args.b);
+                        writeLine(c.cyan(`${args.a} - ${args.b} = `) + c.bold(c.yellow(String(result))));
+                    }
+                }),
+                mul: defineCommand({
+                    meta: { name: 'mul', description: 'Multiply numbers' },
+                    args: {
+                        a: { type: 'positional', required: true },
+                        b: { type: 'positional', required: true }
+                    },
+                    run({ args }) {
+                        const result = parseFloat(args.a) * parseFloat(args.b);
+                        writeLine(c.cyan(`${args.a} × ${args.b} = `) + c.bold(c.yellow(String(result))));
+                    }
+                })
+            },
+            run() {
+                writeLine(cli.renderUsage(calcCommand));
+            }
+        });
+        
+        const demoCommand = defineCommand({
+            meta: { name: 'demo', description: 'Demonstrate features' },
+            args: {
+                feature: { type: 'positional', description: 'colors, box, table, progress' }
+            },
+            run({ args }) {
+                const feature = args.feature || 'all';
+                
+                if (feature === 'colors' || feature === 'all') {
+                    writeLine(c.bold('\n=== Colors Demo ==='));
+                    writeLine(c.red('Red') + ' ' + c.green('Green') + ' ' + c.blue('Blue'));
+                    writeLine(c.yellow('Yellow') + ' ' + c.magenta('Magenta') + ' ' + c.cyan('Cyan'));
+                    writeLine(c.bold('Bold') + ' ' + c.dim('Dim') + ' ' + c.italic('Italic'));
+                    writeLine(c.underline('Underline') + ' ' + c.strikethrough('Strike'));
+                }
+                
+                if (feature === 'box' || feature === 'all') {
+                    writeLine(c.bold('\n=== Box Demo ==='));
+                    writeLine(format.box('Hello World!\nThis is a box.', { style: 'round' }));
+                    writeLine(format.box(c.green('Success!'), { style: 'double' }));
+                }
+                
+                if (feature === 'table' || feature === 'all') {
+                    writeLine(c.bold('\n=== Table Demo ==='));
+                    writeLine(format.table(
+                        ['Name', 'Type', 'Status'],
+                        [
+                            ['universal-cli', 'Library', c.green('Active')],
+                            ['citty', 'Framework', c.yellow('Inspiration')],
+                            ['mri', 'Parser', c.cyan('Bundled')]
+                        ]
+                    ));
+                }
+                
+                if (feature === 'progress' || feature === 'all') {
+                    writeLine(c.bold('\n=== Progress Demo ==='));
+                    for (let i = 0; i <= 100; i += 25) {
+                        writeLine(progress.bar(i, 100, { label: 'Loading' }));
+                    }
+                }
+                
+                if (feature === 'symbols') {
+                    writeLine(c.bold('\n=== Symbols Demo ==='));
+                    writeLine(`${c.green(symbols.tick)} Success`);
+                    writeLine(`${c.red(symbols.cross)} Error`);
+                    writeLine(`${c.yellow(symbols.warning)} Warning`);
+                    writeLine(`${c.blue(symbols.info)} Info`);
+                }
+            }
+        });
+        
+        const mainCommand = defineCommand({
+            meta: {
+                name: 'mycli',
+                version: '1.0.0',
+                description: 'Universal CLI Browser Demo'
+            },
+            subCommands: {
+                greet: greetCommand,
+                calc: calcCommand,
+                demo: demoCommand
+            },
+            run() {
+                writeLine(cli.renderUsage(mainCommand));
+            }
+        });
+        
+        // Execute command
+        function executeCommand() {
+            const input = inputEl.value.trim();
+            if (!input) return;
+            
+            // Parse input into args array
+            const args = cli.input.parseRawArgs(input);
+            
+            // Clear buffer
+            outputBuffer = [];
+            writeLine(`<span class="prompt">$</span> ${input}\n`);
+            
+            // Temporarily redirect output
+            const origWriteln = cli.output.writeln;
+            cli.output.writeln = writeLine;
+            
+            try {
+                runCommand(mainCommand, args);
+            } catch (err) {
+                writeLine(c.red('Error: ') + err.message);
+            }
+            
+            // Restore
+            cli.output.writeln = origWriteln;
+            
+            flushOutput();
+        }
+        
+        // Run example
+        function runExample(cmd) {
+            inputEl.value = cmd;
+            executeCommand();
+        }
+        
+        // Enter key handler
+        inputEl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                executeCommand();
+            }
+        });
+        
+        // Initial help
+        runExample('--help');
+    </script>
+</body>
+</html>

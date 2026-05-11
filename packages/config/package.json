@@ -1,0 +1,51 @@
+{
+  "name": "@simtabi/cli-kit-js-config",
+  "version": "0.0.0",
+  "description": "Layered config: defaults → config/*.{env}.json → env vars → CLI args → runtime overrides. Schema-validated, prototype-pollution-safe.",
+  "license": "MIT",
+  "author": "Simtabi",
+  "homepage": "https://github.com/simtabi/cli-kit-js/tree/main/packages/config",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simtabi/cli-kit-js.git",
+    "directory": "packages/config"
+  },
+  "bugs": {
+    "url": "https://github.com/simtabi/cli-kit-js/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": { "node": ">=22.0.0" },
+  "sideEffects": false,
+  "keywords": ["cli", "cli-kit", "config", "configuration", "schema", "typescript"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "fast-check": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

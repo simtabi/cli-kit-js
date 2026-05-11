@@ -1,0 +1,106 @@
+{
+  "name": "@simtabi/cli-kit-js",
+  "version": "0.0.0",
+  "description": "A safe, fluent, zero-runtime-dependency CLI and rendering toolkit for Node, Deno, Bun, and the browser. Meta-package re-exporting the cli-kit-js family.",
+  "license": "MIT",
+  "author": "Simtabi",
+  "homepage": "https://github.com/simtabi/cli-kit-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simtabi/cli-kit-js.git",
+    "directory": "packages/cli-kit-js"
+  },
+  "bugs": {
+    "url": "https://github.com/simtabi/cli-kit-js/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js",
+      "require": "./dist/core.cjs"
+    },
+    "./parser": {
+      "types": "./dist/parser.d.ts",
+      "import": "./dist/parser.js",
+      "require": "./dist/parser.cjs"
+    },
+    "./ansi": {
+      "types": "./dist/ansi.d.ts",
+      "import": "./dist/ansi.js",
+      "require": "./dist/ansi.cjs"
+    },
+    "./text": {
+      "types": "./dist/text.d.ts",
+      "import": "./dist/text.js",
+      "require": "./dist/text.cjs"
+    },
+    "./render": {
+      "types": "./dist/render.d.ts",
+      "import": "./dist/render.js",
+      "require": "./dist/render.cjs"
+    },
+    "./io": {
+      "types": "./dist/io.d.ts",
+      "import": "./dist/io.js",
+      "require": "./dist/io.cjs"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js",
+      "require": "./dist/config.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": { "node": ">=22.0.0" },
+  "sideEffects": false,
+  "keywords": [
+    "cli",
+    "cli-kit",
+    "command-line",
+    "argv",
+    "ansi",
+    "color",
+    "prompt",
+    "table",
+    "progress",
+    "spinner",
+    "typescript",
+    "zero-dependencies"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {
+    "@simtabi/cli-kit-js-ansi": "workspace:*",
+    "@simtabi/cli-kit-js-config": "workspace:*",
+    "@simtabi/cli-kit-js-core": "workspace:*",
+    "@simtabi/cli-kit-js-io": "workspace:*",
+    "@simtabi/cli-kit-js-parser": "workspace:*",
+    "@simtabi/cli-kit-js-render": "workspace:*",
+    "@simtabi/cli-kit-js-text": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

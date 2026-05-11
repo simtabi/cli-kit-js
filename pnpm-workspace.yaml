@@ -1,0 +1,21 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+  - "docs"
+
+# Centralized dev-dep versions. Reference via "catalog:" in package.json.
+# Bump versions here, every package picks them up.
+catalog:
+  "@biomejs/biome": ^1.9.0
+  "@changesets/cli": ^2.27.0
+  "@commitlint/cli": ^19.0.0
+  "@commitlint/config-conventional": ^19.0.0
+  "@types/node": ^22.0.0
+  "@vitest/coverage-v8": ^2.1.0
+  fast-check: ^3.23.0
+  size-limit: ^11.1.0
+  "@size-limit/preset-small-lib": ^11.1.0
+  tsup: ^8.3.0
+  turbo: ^2.3.0
+  typescript: ^5.6.0
+  vitest: ^2.1.0

@@ -1,0 +1,48 @@
+name: Semgrep
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 2"
+
+concurrency:
+  group: semgrep-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+
+# NOTE: SHA-pinning for the semgrep image is a follow-up in M8 (security
+# hardening pass). For now we pin the major tag; an offline review of the
+# Semgrep release notes is required before each tag bump.
+jobs:
+  scan:
+    name: Semgrep scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: semgrep/semgrep:1.99
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Run Semgrep
+        run: |
+          semgrep scan \
+            --config p/typescript \
+            --config p/javascript \
+            --config p/security-audit \
+            --config p/owasp-top-ten \
+            --exclude legacy \
+            --exclude docs \
+            --sarif \
+            --output semgrep.sarif \
+            --error || true
+
+      - uses: github/codeql-action/upload-sarif@4e828ff8d448a8a6e532957b1811f387a63867e8 # v3.27.4
+        if: always()
+        with:
+          sarif_file: semgrep.sarif

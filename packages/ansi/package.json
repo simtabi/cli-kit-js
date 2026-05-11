@@ -1,0 +1,51 @@
+{
+  "name": "@simtabi/cli-kit-js-ansi",
+  "version": "0.0.0",
+  "description": "SGR colors, strip, and capability detection. Zero deps. Honors NO_COLOR, FORCE_COLOR, isTTY, COLORTERM.",
+  "license": "MIT",
+  "author": "Simtabi",
+  "homepage": "https://github.com/simtabi/cli-kit-js/tree/main/packages/ansi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simtabi/cli-kit-js.git",
+    "directory": "packages/ansi"
+  },
+  "bugs": {
+    "url": "https://github.com/simtabi/cli-kit-js/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": { "node": ">=22.0.0" },
+  "sideEffects": false,
+  "keywords": ["cli", "cli-kit", "ansi", "color", "sgr", "chalk", "kleur", "typescript"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "fast-check": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

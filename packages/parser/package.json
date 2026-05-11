@@ -1,0 +1,51 @@
+{
+  "name": "@simtabi/cli-kit-js-parser",
+  "version": "0.0.0",
+  "description": "argv → typed parsed args. Mri-compatible parser with bug fixes, prototype-pollution defense, and DoS caps.",
+  "license": "MIT",
+  "author": "Simtabi",
+  "homepage": "https://github.com/simtabi/cli-kit-js/tree/main/packages/parser",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simtabi/cli-kit-js.git",
+    "directory": "packages/parser"
+  },
+  "bugs": {
+    "url": "https://github.com/simtabi/cli-kit-js/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": { "node": ">=22.0.0" },
+  "sideEffects": false,
+  "keywords": ["cli", "cli-kit", "argv", "parser", "minimist", "mri", "typescript"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "fast-check": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

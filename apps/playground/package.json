@@ -1,0 +1,24 @@
+{
+  "name": "@simtabi/cli-kit-js-playground",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Browser playground for cli-kit-js. Deployed to Cloudflare Pages. Not published.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'playwright tests land in M6'",
+    "clean": "rm -rf dist .turbo .wrangler"
+  },
+  "dependencies": {
+    "@simtabi/cli-kit-js": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "^5.4.0"
+  }
+}

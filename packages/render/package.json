@@ -1,0 +1,60 @@
+{
+  "name": "@simtabi/cli-kit-js-render",
+  "version": "0.0.0",
+  "description": "Box, table, list, tree, banner, progress bar, spinner, and ANSI→HTML rendering. Width-safe, theme-aware, IOAdapter-driven.",
+  "license": "MIT",
+  "author": "Simtabi",
+  "homepage": "https://github.com/simtabi/cli-kit-js/tree/main/packages/render",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simtabi/cli-kit-js.git",
+    "directory": "packages/render"
+  },
+  "bugs": {
+    "url": "https://github.com/simtabi/cli-kit-js/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./html": {
+      "types": "./dist/html.d.ts",
+      "import": "./dist/html.js",
+      "require": "./dist/html.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": { "node": ">=22.0.0" },
+  "sideEffects": false,
+  "keywords": ["cli", "cli-kit", "render", "box", "table", "progress", "spinner", "ansi-html"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {
+    "@simtabi/cli-kit-js-ansi": "workspace:*",
+    "@simtabi/cli-kit-js-text": "workspace:*",
+    "@simtabi/cli-kit-js-io": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "fast-check": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
