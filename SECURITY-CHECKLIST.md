@@ -58,12 +58,18 @@ Use [`SECURITY.md`](./SECURITY.md) for the receiving end. When a report is accep
 6. Publish a GitHub Security Advisory in the same window. Credit the reporter unless they decline.
 7. Update [`THREAT-MODEL.md`](./THREAT-MODEL.md) with the new defence and link the advisory.
 
+## Closed follow-ups
+
+- ✅ `SecureString` wrapper for password-prompt buffers (`d4a1acc`). Backed by a Uint8Array, zeroed on read/dispose. Exported from `@simtabi/cli-kit-js-prompts`.
+- ✅ `cursorMoves` capability flag exposed on `IOAdapter.capabilities` (`d4a1acc`). Enables future browser-interactive prompts without breaking existing TTY consumers.
+
 ## Open follow-ups
 
 These are tracked for future hardening but not blockers for any specific release:
 
 - Full SHA-pin for the Semgrep container image (currently uses minor-version tag).
-- `SecureString` wrapper for password-prompt buffers (zeroes underlying storage on read).
 - Sigstore key-signing for releases (in addition to npm provenance).
 - Reproducible-build verification across toolchain versions (currently "deterministic given a pinned toolchain").
-- Browser-side prompts: optional xterm.js bridge for true raw-mode parity.
+- Browser-side prompts: arrow-key navigation in DOM adapter, optionally an xterm.js bridge. The `cursorMoves: false` capability now exists to make this trackable without API churn.
+- Audit-log ring buffer for `config.set()` mutations (toggleable; cost of always-on storage).
+- API freeze enforcement via `api-extractor` once we reach 1.0.

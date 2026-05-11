@@ -85,11 +85,11 @@ A living document. Every architectural change to packages in `packages/**` shoul
 *Package: `@simtabi/cli-kit-js-prompts`*
 
 - Prompt answers never re-rendered through `writeRaw` or unsafe paths. The renderer treats every keystroke as untrusted text.
-- Password prompts render the mask character (default `*`) for each typed character; the underlying buffer is held in the prompt's local closure and never reaches `io.write` or `io.writeRaw`. **Verified by test:** `password.test.ts` asserts the actual buffer never appears in `io.rawWrites`.
+- Password prompts render the mask character (default `*`) for each typed character; the underlying buffer is a `SecureString` (`d4a1acc`) — a Uint8Array zero-filled on `read()`, `dispose()`, and on every `popChar()` of dropped tail bytes. The mask is the only thing that ever reaches `io.writeRaw`. **Verified by test:** `password.test.ts` asserts the actual buffer never appears in `io.rawWrites`.
+- `SecureString.peek()` is used for mid-prompt validation (keeps the buffer alive on failure so the user can edit); `read()` is used on accept and disposes the buffer immediately. `peek()` materialises a regular JS string — narrowing the lifetime, not eliminating it; documented as such.
 - DECSC / DECRC (`\x1b7` / `\x1b8`) used to save+restore cursor around the validation-error row so stale errors never linger across redraws. (Fixed in `a18f562`.)
-- Ctrl+C and Escape unconditionally throw `PromptCancelledError`.
+- Ctrl+C and Escape unconditionally throw `PromptCancelledError`; the SecureString is `dispose()`d on cancel.
 - AbortSignal threads through every prompt; abort fires from outside cleanly cancel the read.
-- Future hardening (post-1.0): `SecureString` wrapper for the password buffer that wipes on read.
 
 ### Signal handling & lifecycle (A1)
 *Package: `@simtabi/cli-kit-js-io`, `@simtabi/cli-kit-js-core`*
