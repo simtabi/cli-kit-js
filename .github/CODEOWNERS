@@ -1,0 +1,23 @@
+# Code-owner enforcement. Lines later in the file win.
+#
+# Default owner — every PR requires at least one maintainer review.
+*                                       @simtabi/maintainers
+
+# Security-sensitive paths require a maintainer in the security-review group.
+# A reviewer in this group must sign off in addition to any other reviewers
+# the PR template flags.
+/packages/parser/**                     @simtabi/maintainers @simtabi/security
+/packages/io/**                         @simtabi/maintainers @simtabi/security
+/packages/ansi/**                       @simtabi/maintainers @simtabi/security
+/packages/render/src/html.ts            @simtabi/maintainers @simtabi/security
+/packages/config/**                     @simtabi/maintainers @simtabi/security
+/packages/prompts/**                    @simtabi/maintainers @simtabi/security
+
+# Supply-chain surface.
+/.github/workflows/**                   @simtabi/maintainers @simtabi/security
+/.changeset/**                          @simtabi/maintainers @simtabi/security
+/pnpm-lock.yaml                         @simtabi/maintainers @simtabi/security
+/pnpm-workspace.yaml                    @simtabi/maintainers @simtabi/security
+/SECURITY.md                            @simtabi/maintainers @simtabi/security
+/THREAT-MODEL.md                        @simtabi/maintainers @simtabi/security
+/SECURITY-CHECKLIST.md                  @simtabi/maintainers @simtabi/security

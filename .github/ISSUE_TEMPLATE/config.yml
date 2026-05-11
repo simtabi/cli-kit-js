@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/simtabi/cli-kit-js/blob/main/SECURITY.md
+    about: "Do NOT open a public issue — email security@simtabi.com per SECURITY.md (90-day embargo by default)."
+  - name: Questions / discussion
+    url: https://github.com/simtabi/cli-kit-js/discussions
+    about: Open a discussion for usage questions or design ideas.
