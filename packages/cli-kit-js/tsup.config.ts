@@ -12,5 +12,7 @@ export default defineConfig({
     'src/render.ts',
     'src/io.ts',
     'src/config.ts',
+    'src/prompts.ts',
+    'src/testing.ts',
   ],
 })

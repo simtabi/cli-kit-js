@@ -1,0 +1,66 @@
+/**
+ * Y/N confirmation prompt.
+ *
+ *   ? Continue? (Y/n) ›
+ *
+ * Single-keystroke — `y`/`Y` → true, `n`/`N` → false, Enter → default,
+ * anything else: ignored. Ctrl+C / Escape cancel.
+ */
+
+import {
+  ARROW,
+  Q_MARK,
+  clearCurrentLine,
+  isCancelKey,
+  isEnterKey,
+  throwIfAborted,
+} from './render'
+import { PromptCancelledError, type ConfirmPromptOptions } from './types'
+
+export async function confirm(opts: ConfirmPromptOptions): Promise<boolean> {
+  const { io, message, signal } = opts
+  const defaultValue = opts.default ?? false
+  throwIfAborted(signal)
+
+  if (!io.isTTY) {
+    const yn = defaultValue ? 'Y/n' : 'y/N'
+    io.write(`${message} (${yn}) `)
+    const line = (
+      await io.readLine(signal ?? new AbortController().signal)
+    ).trim().toLowerCase()
+    if (line === '') return defaultValue
+    if (line === 'y' || line === 'yes') return true
+    if (line === 'n' || line === 'no') return false
+    return defaultValue
+  }
+
+  const yn = defaultValue ? 'Y/n' : 'y/N'
+  const sig = signal ?? new AbortController().signal
+
+  const render = () => {
+    clearCurrentLine(io)
+    io.writeRaw(`${Q_MARK} ${message} (${yn}) ${ARROW} `)
+  }
+  render()
+
+  // biome-ignore lint/correctness/noConstantCondition: prompt loop
+  while (true) {
+    const key = await io.readKey(sig)
+    if (isCancelKey(key)) {
+      io.writeRaw('\n')
+      throw new PromptCancelledError()
+    }
+    if (isEnterKey(key)) {
+      io.writeRaw(`${defaultValue ? 'Y' : 'N'}\n`)
+      return defaultValue
+    }
+    if (key.name === 'y' || key.raw === 'Y' || key.raw === 'y') {
+      io.writeRaw('Y\n')
+      return true
+    }
+    if (key.name === 'n' || key.raw === 'N' || key.raw === 'n') {
+      io.writeRaw('N\n')
+      return false
+    }
+  }
+}

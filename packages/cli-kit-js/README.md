@@ -27,7 +27,7 @@ import { detectColorDepth } from '@simtabi/cli-kit-js/ansi'
 
 | Path                                | Re-exports                          |
 | ----------------------------------- | ----------------------------------- |
-| `@simtabi/cli-kit-js`               | everything                          |
+| `@simtabi/cli-kit-js`               | everything (except testing)         |
 | `@simtabi/cli-kit-js/core`          | `@simtabi/cli-kit-js-core`          |
 | `@simtabi/cli-kit-js/parser`        | `@simtabi/cli-kit-js-parser`        |
 | `@simtabi/cli-kit-js/ansi`          | `@simtabi/cli-kit-js-ansi`          |
@@ -35,6 +35,8 @@ import { detectColorDepth } from '@simtabi/cli-kit-js/ansi'
 | `@simtabi/cli-kit-js/render`        | `@simtabi/cli-kit-js-render`        |
 | `@simtabi/cli-kit-js/io`            | `@simtabi/cli-kit-js-io`            |
 | `@simtabi/cli-kit-js/config`        | `@simtabi/cli-kit-js-config`        |
+| `@simtabi/cli-kit-js/prompts`       | `@simtabi/cli-kit-js-prompts`       |
+| `@simtabi/cli-kit-js/testing`       | `@simtabi/cli-kit-js-testing` (dev) |
 
 ## License
 

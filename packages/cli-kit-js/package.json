@@ -58,6 +58,16 @@
       "import": "./dist/config.js",
       "require": "./dist/config.cjs"
     },
+    "./prompts": {
+      "types": "./dist/prompts.d.ts",
+      "import": "./dist/prompts.js",
+      "require": "./dist/prompts.cjs"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js",
+      "require": "./dist/testing.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": ["dist", "README.md", "LICENSE"],
@@ -94,7 +104,9 @@
     "@simtabi/cli-kit-js-core": "workspace:*",
     "@simtabi/cli-kit-js-io": "workspace:*",
     "@simtabi/cli-kit-js-parser": "workspace:*",
+    "@simtabi/cli-kit-js-prompts": "workspace:*",
     "@simtabi/cli-kit-js-render": "workspace:*",
+    "@simtabi/cli-kit-js-testing": "workspace:*",
     "@simtabi/cli-kit-js-text": "workspace:*"
   },
   "devDependencies": {

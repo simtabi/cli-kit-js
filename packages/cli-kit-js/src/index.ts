@@ -16,5 +16,9 @@ export * from '@simtabi/cli-kit-js-config'
 export * from '@simtabi/cli-kit-js-core'
 export * from '@simtabi/cli-kit-js-io'
 export * from '@simtabi/cli-kit-js-parser'
+export * from '@simtabi/cli-kit-js-prompts'
 export * from '@simtabi/cli-kit-js-render'
 export * from '@simtabi/cli-kit-js-text'
+// `@simtabi/cli-kit-js-testing` is exposed via subpath only
+// (`@simtabi/cli-kit-js/testing`) so it isn't pulled into production
+// bundles by a wildcard re-export.

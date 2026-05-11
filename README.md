@@ -52,7 +52,8 @@ The package boundary carries the language signal; class, interface, and function
 | `@simtabi/cli-kit-js-render`         | box, table, list, tree, banner, progress bar, spinner, ANSI→HTML        |
 | `@simtabi/cli-kit-js-io`             | `IOAdapter` + Node, DOM, DevTools, Memory implementations               |
 | `@simtabi/cli-kit-js-config`         | Layered config from `./config/*.{env}.json` + env + CLI + runtime       |
-| `@simtabi/cli-kit-js-testing`        | Memory adapters, prompt drivers, snapshot helpers                       |
+| `@simtabi/cli-kit-js-prompts`        | text / password / confirm / select / multiselect interactive prompts    |
+| `@simtabi/cli-kit-js-testing`        | Memory adapters, prompt drivers, matchers, snapshot helpers             |
 | `@simtabi/cli-kit-js`                | Meta-package re-exporting all of the above with subpath exports         |
 
 > Subpackage names carry `-js` deliberately — it keeps the brand consistent in registry searches and signals which language family the package belongs to. Class, interface, and function names inside the code do not carry `-js`: a class is `Command`, not `JsCommand`.
