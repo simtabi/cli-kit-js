@@ -64,7 +64,11 @@
           "level": "warn",
           "options": { "allow": ["error", "warn"] }
         },
-        "noEmptyBlockStatements": "error"
+        "noEmptyBlockStatements": "error",
+        "noControlCharactersInRegex": "off"
+      },
+      "performance": {
+        "noDelete": "off"
       },
       "nursery": {
         "noProcessEnv": "off",

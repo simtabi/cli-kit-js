@@ -144,6 +144,7 @@ describe('freezeTime', () => {
 describe('withEnv', () => {
   it('overrides + restores env vars', async () => {
     process.env.PRIOR_TEST = 'prior'
+    // Use `delete` — assigning `undefined` to process.env coerces to "undefined" (string).
     delete process.env.NEW_TEST
     await withEnv({ PRIOR_TEST: 'overridden', NEW_TEST: 'added' }, async () => {
       expect(process.env.PRIOR_TEST).toBe('overridden')

@@ -12,15 +12,8 @@
  *     Consumers that need prompts should use the DOM adapter instead.
  */
 
-import { sanitize, type Capabilities } from '@simtabi/cli-kit-js-ansi'
+import { type Capabilities, sanitize } from '@simtabi/cli-kit-js-ansi'
 import type { IOAdapter, KeyEvent, ResizeListener } from './types'
-
-class AbortError extends Error {
-  override readonly name = 'AbortError'
-  constructor() {
-    super('aborted')
-  }
-}
 
 interface StyleState {
   fg?: string
@@ -107,12 +100,14 @@ function applyCodes(state: StyleState, codes: readonly number[]): StyleState {
       delete next.bg
       continue
     }
-    if (c in FG) {
-      next.fg = FG[c]
+    const fgVal = FG[c]
+    if (fgVal !== undefined) {
+      next.fg = fgVal
       continue
     }
-    if (c in BG) {
-      next.bg = BG[c]
+    const bgVal = BG[c]
+    if (bgVal !== undefined) {
+      next.bg = bgVal
       continue
     }
     if (c === 38 || c === 48) {
@@ -176,7 +171,10 @@ export function toConsoleArgs(input: string): [string, ...string[]] {
     format += `%c${cleaned.slice(cursor)}`
     css.push(stateToCss(state))
   }
-  if (css.length === 0) return [cleaned]
+  // If nothing actually applied styling, drop the %c overhead and emit the
+  // string raw — DevTools displays it identically and the consumer's spy /
+  // mock receives a clean argument list.
+  if (css.length === 0 || css.every((s) => s.length === 0)) return [cleaned]
   return [format, ...css]
 }
 

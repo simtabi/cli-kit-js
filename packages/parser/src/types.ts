@@ -2,13 +2,7 @@
  * Public types for `@simtabi/cli-kit-js-parser`.
  */
 
-export type ArgType =
-  | 'string'
-  | 'number'
-  | 'integer'
-  | 'boolean'
-  | 'count'
-  | 'positional'
+export type ArgType = 'string' | 'number' | 'integer' | 'boolean' | 'count' | 'positional'
 
 export interface ArgDef {
   readonly type: ArgType

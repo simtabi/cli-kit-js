@@ -11,7 +11,7 @@
  */
 
 import { strip } from '@simtabi/cli-kit-js-ansi'
-import { rangeContains, WIDE_RANGES, ZERO_RANGES } from './width-table'
+import { WIDE_RANGES, ZERO_RANGES, rangeContains } from './width-table'
 
 /**
  * Width of a single codepoint, in display columns:

@@ -6,11 +6,7 @@
 import { width } from '@simtabi/cli-kit-js-text'
 import type { ProgressBarOptions } from './types'
 
-export function progressBar(
-  current: number,
-  total: number,
-  opts: ProgressBarOptions = {},
-): string {
+export function progressBar(current: number, total: number, opts: ProgressBarOptions = {}): string {
   const w = opts.width ?? 40
   const complete = opts.complete ?? '█'
   const incomplete = opts.incomplete ?? '░'

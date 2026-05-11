@@ -57,7 +57,9 @@ function rgbTo256(r: number, g: number, b: number): number {
     if (r > 248) return 231
     return Math.round(((r - 8) / 247) * 24) + 232
   }
-  return 16 + 36 * Math.round((r / 255) * 5) + 6 * Math.round((g / 255) * 5) + Math.round((b / 255) * 5)
+  return (
+    16 + 36 * Math.round((r / 255) * 5) + 6 * Math.round((g / 255) * 5) + Math.round((b / 255) * 5)
+  )
 }
 
 /**
@@ -139,10 +141,10 @@ export function createColors(opts?: { depth?: ColorDepth; env?: DetectEnv }): Co
     bgCyan: wrap(46, 49, depth),
     bgWhite: wrap(47, 49, depth),
 
-    fg256: (n) => wrap256(n, depth, false),
-    bg256: (n) => wrap256(n, depth, true),
-    rgb: (r, g, b) => wrapRgb(r, g, b, depth, false),
-    bgRgb: (r, g, b) => wrapRgb(r, g, b, depth, true),
+    fg256: (n: number) => wrap256(n, depth, false),
+    bg256: (n: number) => wrap256(n, depth, true),
+    rgb: (r: number, g: number, b: number) => wrapRgb(r, g, b, depth, false),
+    bgRgb: (r: number, g: number, b: number) => wrapRgb(r, g, b, depth, true),
   })
 }
 

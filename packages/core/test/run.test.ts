@@ -2,7 +2,12 @@ import { MemoryAdapter } from '@simtabi/cli-kit-js-io'
 import { describe, expect, it } from 'vitest'
 import { defineCommand, run } from '../src/index'
 
-function harness(): { io: MemoryAdapter; signal: AbortSignal; ac: AbortController; opts: import('../src/index').RunOptions } {
+function harness(): {
+  io: MemoryAdapter
+  signal: AbortSignal
+  ac: AbortController
+  opts: import('../src/index').RunOptions
+} {
   const io = new MemoryAdapter()
   const ac = new AbortController()
   return {
@@ -187,7 +192,7 @@ describe('run: lifecycle', () => {
       meta: { name: 'x' },
       setup: ({ signal }) => {
         // Signal already aborted before setup completes? Schedule abort during setup.
-        ;(signal as AbortSignal & { dispatchEvent: (e: Event) => boolean }) // noop
+        signal as AbortSignal & { dispatchEvent: (e: Event) => boolean } // noop
       },
       run: () => 'should not run',
     })

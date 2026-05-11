@@ -11,21 +11,18 @@ describe('tree', () => {
   })
 
   it('uses ascii fallback', () => {
-    const out = tree(
-      { label: 'r', children: [{ label: 'x' }] },
-      { ascii: true },
-    )
+    // Two children so both branch (`+--`) and last (`` `-- ``) glyphs appear.
+    const out = tree({ label: 'r', children: [{ label: 'x' }, { label: 'y' }] }, { ascii: true })
     expect(out).toContain('+--')
+    expect(out).toContain('`--')
     expect(out).not.toContain('├')
+    expect(out).not.toContain('└')
   })
 
   it('renders nested tree with continuation pipes', () => {
     const out = tree({
       label: 'root',
-      children: [
-        { label: 'a', children: [{ label: 'a1' }, { label: 'a2' }] },
-        { label: 'b' },
-      ],
+      children: [{ label: 'a', children: [{ label: 'a1' }, { label: 'a2' }] }, { label: 'b' }],
     })
     expect(out).toContain('│   ├── a1')
     expect(out).toContain('│   └── a2')

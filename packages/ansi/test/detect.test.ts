@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  detectColorDepth,
-  detectCursorMoves,
-  detectHyperlinks,
-  detectUnicode,
-} from '../src/index'
+import { detectColorDepth, detectCursorMoves, detectHyperlinks, detectUnicode } from '../src/index'
 
 describe('detectColorDepth', () => {
   it('returns 0 when CLIKIT_DETERMINISTIC=1', () => {
@@ -54,9 +49,7 @@ describe('detectColorDepth', () => {
   })
 
   it('COLORTERM=truecolor → 24', () => {
-    expect(
-      detectColorDepth({ env: { COLORTERM: 'truecolor' }, isTTY: true }),
-    ).toBe(24)
+    expect(detectColorDepth({ env: { COLORTERM: 'truecolor' }, isTTY: true })).toBe(24)
   })
 
   it('TERM=xterm-256color → 8', () => {
@@ -121,8 +114,6 @@ describe('detectHyperlinks', () => {
     expect(detectHyperlinks({ env: { FORCE_HYPERLINKS: '1' } })).toBe(true)
   })
   it('NO_HYPERLINKS suppresses TERM_PROGRAM', () => {
-    expect(
-      detectHyperlinks({ env: { NO_HYPERLINKS: '1', TERM_PROGRAM: 'iTerm.app' } }),
-    ).toBe(false)
+    expect(detectHyperlinks({ env: { NO_HYPERLINKS: '1', TERM_PROGRAM: 'iTerm.app' } })).toBe(false)
   })
 })

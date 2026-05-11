@@ -182,12 +182,14 @@ function applyCodes(state: StyleState, codes: readonly number[]): StyleState {
       delete next.bg
       continue
     }
-    if (code in BASIC_FG) {
-      next.fg = BASIC_FG[code]
+    const fgVal = BASIC_FG[code]
+    if (fgVal !== undefined) {
+      next.fg = fgVal
       continue
     }
-    if (code in BASIC_BG) {
-      next.bg = BASIC_BG[code]
+    const bgVal = BASIC_BG[code]
+    if (bgVal !== undefined) {
+      next.bg = bgVal
       continue
     }
     // Extended: 38;5;N (256-color fg), 38;2;R;G;B (truecolor fg), and bg

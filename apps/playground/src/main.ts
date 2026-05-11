@@ -6,16 +6,9 @@
  * compatible — no inline scripts, no innerHTML.
  */
 
-import { colors } from '@simtabi/cli-kit-js/ansi'
 import { createDomAdapter } from '@simtabi/cli-kit-js-io/dom'
-import {
-  banner,
-  box,
-  createSpinner,
-  progressBar,
-  table,
-  tree,
-} from '@simtabi/cli-kit-js/render'
+import { colors } from '@simtabi/cli-kit-js/ansi'
+import { banner, box, createSpinner, progressBar, table, tree } from '@simtabi/cli-kit-js/render'
 
 const terminal = document.querySelector<HTMLDivElement>('#terminal')
 if (!terminal) {

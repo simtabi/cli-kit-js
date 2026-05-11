@@ -37,15 +37,15 @@ describe('truncate', () => {
 })
 
 describe('pad', () => {
-  it('pads right by default', () => {
+  it('left-aligns by default (text on left, padding on right)', () => {
     expect(pad('hi', 5)).toBe('hi   ')
   })
 
-  it('pads left', () => {
-    expect(pad('hi', 5, 'left')).toBe('   hi')
+  it("right-aligns when side is 'right'", () => {
+    expect(pad('hi', 5, 'right')).toBe('   hi')
   })
 
-  it('pads center', () => {
+  it('center-aligns', () => {
     expect(pad('hi', 6, 'center')).toBe('  hi  ')
   })
 
@@ -53,12 +53,11 @@ describe('pad', () => {
     expect(pad('hello', 3)).toBe('hello')
   })
 
-  it('pads with custom char', () => {
-    expect(pad('5', 4, 'left', '0')).toBe('0005')
+  it('right-aligns with custom fill', () => {
+    expect(pad('5', 4, 'right', '0')).toBe('0005')
   })
 
   it('respects CJK columns', () => {
-    // '中' = 2 columns; padding to 5 needs 3 spaces
     expect(pad('中', 5)).toBe('中   ')
   })
 })

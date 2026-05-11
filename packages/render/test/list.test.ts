@@ -15,10 +15,7 @@ describe('list', () => {
   })
 
   it('nested items', () => {
-    const out = list([
-      'top',
-      { text: 'parent', children: ['child1', 'child2'] },
-    ])
+    const out = list(['top', { text: 'parent', children: ['child1', 'child2'] }])
     expect(out).toContain('• top')
     expect(out).toContain('• parent')
     expect(out).toContain('  • child1')

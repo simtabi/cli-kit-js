@@ -10,7 +10,8 @@ interface RestorableMock {
 export function freezeTime(at: Date | string | number): RestorableMock {
   const stamp = typeof at === 'number' ? at : new Date(at).getTime()
   const originalNow = Date.now
-  const originalPerfNow = typeof performance !== 'undefined' ? performance.now.bind(performance) : null
+  const originalPerfNow =
+    typeof performance !== 'undefined' ? performance.now.bind(performance) : null
   let perfStart = 0
   Date.now = () => stamp
   if (originalPerfNow) {

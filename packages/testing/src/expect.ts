@@ -5,8 +5,8 @@
  * runner (Vitest, Node `test`, Mocha) — no test framework dependency.
  */
 
-import type { MemoryAdapter } from '@simtabi/cli-kit-js-io'
 import type { RunResult } from '@simtabi/cli-kit-js-core'
+import type { MemoryAdapter } from '@simtabi/cli-kit-js-io'
 
 export interface ExpectOptions {
   /** Optional descriptive label for the failure message. */

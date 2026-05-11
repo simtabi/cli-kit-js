@@ -85,7 +85,10 @@ export interface ConfigInstance {
   /** Read a value by dot-path. */
   get<T = unknown>(path: string, defaultValue?: T): T
   /** Mutate a value at runtime (layer 'runtime'). */
-  set(path: string, value: unknown): { readonly ok: true } | { readonly ok: false; readonly error: ConfigValidationError }
+  set(
+    path: string,
+    value: unknown,
+  ): { readonly ok: true } | { readonly ok: false; readonly error: ConfigValidationError }
   /** Deep-merge a patch into the runtime layer. */
   assign(patch: Readonly<Record<string, unknown>>): readonly ConfigValidationError[]
   /** Revert one path back to its file-loaded value. */

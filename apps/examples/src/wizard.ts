@@ -13,7 +13,6 @@
 
 import { defineCommand, run } from '@simtabi/cli-kit-js'
 import { colors } from '@simtabi/cli-kit-js/ansi'
-import { box, list } from '@simtabi/cli-kit-js/render'
 import {
   PromptCancelledError,
   confirm,
@@ -22,6 +21,7 @@ import {
   select,
   text,
 } from '@simtabi/cli-kit-js/prompts'
+import { box, list } from '@simtabi/cli-kit-js/render'
 
 const wizard = defineCommand({
   meta: {
@@ -87,19 +87,12 @@ const wizard = defineCommand({
       io.write('\n')
       io.write(
         `${box(
-          `Project created!\n\nName:     ${colors.cyan(name)}\nEnv:      ${colors.cyan(env)}\nFeatures: ${features.length}` +
-            (apiKey.length > 0 ? `\nToken:    ${'•'.repeat(8)} (saved)` : ''),
+          `Project created!\n\nName:     ${colors.cyan(name)}\nEnv:      ${colors.cyan(env)}\nFeatures: ${features.length}${apiKey.length > 0 ? `\nToken:    ${'•'.repeat(8)} (saved)` : ''}`,
           { style: 'round', padding: { x: 2, y: 1 }, title: '✓' },
         )}\n`,
       )
       io.write(`\n${colors.bold('Next steps:')}\n`)
-      io.write(
-        `${list([
-          `cd ${name}`,
-          'pnpm install',
-          'pnpm dev',
-        ])}\n`,
-      )
+      io.write(`${list([`cd ${name}`, 'pnpm install', 'pnpm dev'])}\n`)
     } catch (err) {
       if (err instanceof PromptCancelledError) {
         io.write(`\n${colors.yellow('Cancelled.')}\n`)

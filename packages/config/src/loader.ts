@@ -15,11 +15,11 @@
 
 import { promises as fs } from 'node:fs'
 import * as path from 'node:path'
-import { safeParse, JsonSizeError, PollutionError } from './json'
+import { JsonSizeError, PollutionError, safeParse } from './json'
 import {
+  type ConfigValidationError,
   DEFAULT_MAX_FILE_BYTES,
   DEFAULT_MAX_TOTAL_BYTES,
-  type ConfigValidationError,
   type SchemaLayer,
 } from './types'
 

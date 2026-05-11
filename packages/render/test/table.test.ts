@@ -41,8 +41,10 @@ describe('table', () => {
   })
 
   it('maxCellWidth truncates with ellipsis', () => {
+    // truncate(s, 5) caps the entire output (including the ellipsis) at 5
+    // columns, so 'supercalifragilistic' becomes 'supe…' (4 chars + '…').
     const out = table([['supercalifragilistic', 'short']], { maxCellWidth: 5 })
-    expect(out).toMatch(/super…|s…/)
+    expect(out).toMatch(/supe…/)
   })
 
   it('uses border style', () => {

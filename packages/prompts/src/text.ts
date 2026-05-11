@@ -68,7 +68,6 @@ export async function text(opts: TextPromptOptions): Promise<string> {
 
   render()
 
-  // biome-ignore lint/correctness/noConstantCondition: prompt loop
   while (true) {
     const key = await io.readKey(sig)
     if (isCancelKey(key)) {

@@ -20,7 +20,7 @@
 
 import * as readline from 'node:readline'
 import { Readable } from 'node:stream'
-import { detectCapabilities, sanitize, type Capabilities } from '@simtabi/cli-kit-js-ansi'
+import { type Capabilities, detectCapabilities, sanitize } from '@simtabi/cli-kit-js-ansi'
 import type { IOAdapter, KeyEvent, ResizeListener } from './types'
 
 class AbortError extends Error {
@@ -125,7 +125,7 @@ class NodeStdioAdapter implements IOAdapter {
       const rl = readline.createInterface({
         input: this.#stdin,
         terminal: false,
-        crlfDelay: Infinity,
+        crlfDelay: Number.POSITIVE_INFINITY,
       })
       const onAbort = () => {
         signal.removeEventListener('abort', onAbort)
@@ -175,10 +175,7 @@ class NodeStdioAdapter implements IOAdapter {
         cleanup()
         reject(new AbortError())
       }
-      const onKey = (
-        _str: string,
-        key: readline.Key | undefined,
-      ) => {
+      const onKey = (_str: string, key: readline.Key | undefined) => {
         cleanup()
         signal.removeEventListener('abort', onAbort)
         resolve({

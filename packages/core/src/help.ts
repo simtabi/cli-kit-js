@@ -2,7 +2,7 @@
  * Help generation: pretty (TTY), JSON, Markdown, and man-page (groff) formats.
  */
 
-import { colors as defaultColors, type ColorDepth, createColors } from '@simtabi/cli-kit-js-ansi'
+import { type ColorDepth, createColors, colors as defaultColors } from '@simtabi/cli-kit-js-ansi'
 import { pad, width } from '@simtabi/cli-kit-js-text'
 import { isLazyCommand } from './lazy'
 import type { Command, SubCommands } from './types'
@@ -40,7 +40,9 @@ function renderText(command: Command, opts: RenderHelpOptions): string {
   const colors =
     opts.colorDepth !== undefined ? createColors({ depth: opts.colorDepth }) : defaultColors
   const path = opts.path ?? [command.meta.name]
-  const cols = Math.max(40, opts.columns ?? 100)
+  // `opts.columns` is reserved for a future wrap-at-cols pass; currently
+  // every output line is bounded by the longest declared option/positional.
+  void opts.columns
   const lines: string[] = []
 
   // Header
@@ -76,8 +78,7 @@ function renderText(command: Command, opts: RenderHelpOptions): string {
     const visible = entries.filter(([, c]) => isLazyCommand(c) || !c.meta.hidden)
     const maxName = Math.max(...visible.map(([n]) => width(n)), 0)
     for (const [name, sub] of visible) {
-      const desc =
-        isLazyCommand(sub) ? '' : sub.meta.description ?? ''
+      const desc = isLazyCommand(sub) ? '' : (sub.meta.description ?? '')
       lines.push(`  ${colors.cyan(pad(name, maxName))}  ${colors.gray(desc)}`)
     }
     lines.push('')
@@ -98,9 +99,11 @@ function renderText(command: Command, opts: RenderHelpOptions): string {
       }
       let help = ''
       if (def.description) help += def.description
-      if (def.default !== undefined) help += ` ${colors.gray(`(default: ${JSON.stringify(def.default)})`)}`
+      if (def.default !== undefined)
+        help += ` ${colors.gray(`(default: ${JSON.stringify(def.default)})`)}`
       if (def.required) help += ` ${colors.red('[required]')}`
-      if (def.env) help += ` ${colors.gray(`[env: ${Array.isArray(def.env) ? def.env.join(', ') : def.env}]`)}`
+      if (def.env)
+        help += ` ${colors.gray(`[env: ${Array.isArray(def.env) ? def.env.join(', ') : def.env}]`)}`
       items.push({ flags, help })
     }
     const maxFlags = Math.max(...items.map((i) => width(i.flags)))
@@ -148,7 +151,10 @@ interface CommandJSON {
   readonly version?: string
   readonly description?: string
   readonly args?: Record<string, unknown>
-  readonly subCommands?: Record<string, CommandJSON | { readonly lazy: true; readonly name: string }>
+  readonly subCommands?: Record<
+    string,
+    CommandJSON | { readonly lazy: true; readonly name: string }
+  >
   readonly examples?: readonly string[]
   readonly strict?: boolean
 }
@@ -231,7 +237,7 @@ function renderMarkdown(command: Command, path: readonly string[]): string {
     lines.push('| Command | Description |')
     lines.push('| --- | --- |')
     for (const [name, sub] of Object.entries(command.subCommands)) {
-      const desc = isLazyCommand(sub) ? '_(lazy-loaded)_' : sub.meta.description ?? ''
+      const desc = isLazyCommand(sub) ? '_(lazy-loaded)_' : (sub.meta.description ?? '')
       lines.push(`| \`${name}\` | ${desc} |`)
     }
     lines.push('')
@@ -259,9 +265,9 @@ function renderMarkdown(command: Command, path: readonly string[]): string {
     lines.push('## Examples')
     lines.push('')
     for (const ex of command.meta.examples) {
-      lines.push(`\`\`\`bash`)
+      lines.push('```bash')
       lines.push(ex)
-      lines.push(`\`\`\``)
+      lines.push('```')
       lines.push('')
     }
   }
@@ -299,7 +305,9 @@ function renderMan(command: Command, path: readonly string[]): string {
     lines.push('.SH OPTIONS')
     for (const [n, def] of opts) {
       lines.push('.TP')
-      const alias = def.alias ? `\\fB-${Array.isArray(def.alias) ? def.alias[0] : def.alias}\\fR, ` : ''
+      const alias = def.alias
+        ? `\\fB-${Array.isArray(def.alias) ? def.alias[0] : def.alias}\\fR, `
+        : ''
       lines.push(`${alias}\\fB--${n}\\fR`)
       if (def.description) lines.push(def.description)
     }

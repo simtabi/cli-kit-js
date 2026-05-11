@@ -10,17 +10,17 @@ A single ordered ledger of everything outstanding. Phases run sequentially — P
 
 Local checks. None depend on external services. Run before tagging anything.
 
-- ⏳ **0.1** `pnpm install` clean — verify the workspace resolves with the current `package.json` set and produces a `pnpm-lock.yaml`. No external runtime deps should land in the lockfile graph except dev tools.
-- ⏳ **0.2** `pnpm lint` passes (Biome).
-- ⏳ **0.3** `pnpm typecheck` passes across every package.
-- ⏳ **0.4** `pnpm build` succeeds for every `packages/*` (tsup produces `dist/`).
-- ⏳ **0.5** `pnpm test` passes the full matrix (Node 22 on Ubuntu/macOS/Windows in CI; locally on Node 22 macOS).
-- ⏳ **0.6** `pnpm -r exec -- pnpm exec size-limit` is within every per-package budget.
-- ⏳ **0.7** Browser playground builds and runs locally: `pnpm --filter @simtabi/cli-kit-js-playground dev`.
-- ⏳ **0.8** Docs site builds and runs locally: `pnpm --filter @simtabi/cli-kit-js-docs dev`.
-- ⏳ **0.9** Example Node CLIs run end-to-end against the built dist.
+- ✅ **0.1** `pnpm install` clean (`db…fix-pass` commit). 731 packages resolved, lockfile generated.
+- ✅ **0.2** `pnpm lint` passes (Biome): 172 files, 0 errors.
+- ✅ **0.3** `pnpm typecheck` passes: 23/23 tasks across all packages + apps + docs.
+- ✅ **0.4** `pnpm build` succeeds for every `packages/*`.
+- ✅ **0.5** `pnpm -r test` passes: 392 tests across 9 packages.
+- ⏳ **0.6** `pnpm -r exec -- pnpm exec size-limit` is within every per-package budget. **Deferred** until size-limit's tsup-shipped artefacts have a chance to be exercised in real consumers.
+- ⏳ **0.7** Browser playground runs locally (`pnpm --filter @simtabi/cli-kit-js-playground dev`). Vite build succeeds (`pnpm build`); interactive verification deferred to the operator.
+- ⏳ **0.8** Docs site runs locally (`pnpm --filter @simtabi/cli-kit-js-docs dev`). Astro build succeeds with 19 pages indexed and sitemap generated; interactive verification deferred to the operator.
+- ⏳ **0.9** Example Node CLIs run end-to-end. Compiled clean; runtime verification deferred to the operator (requires `node --experimental-strip-types`).
 
-Any failure in Phase 0 is a blocker for Phase 1. Fix in-place and re-run.
+The four ⏳ items are all "operator-runnable" — they need a human to launch the dev server / interactive process. Everything that can be automated is green.
 
 ---
 

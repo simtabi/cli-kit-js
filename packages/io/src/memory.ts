@@ -3,7 +3,7 @@
  * replays queued keystrokes and lines for prompts.
  */
 
-import { sanitize, type Capabilities, type ColorDepth } from '@simtabi/cli-kit-js-ansi'
+import { type Capabilities, type ColorDepth, sanitize } from '@simtabi/cli-kit-js-ansi'
 import type { IOAdapter, KeyEvent, ResizeListener } from './types'
 
 export interface MemoryAdapterOptions {

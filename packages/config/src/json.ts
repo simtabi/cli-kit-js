@@ -32,7 +32,10 @@ export class PollutionError extends Error {
 }
 
 export class JsonSizeError extends Error {
-  constructor(public readonly bytes: number, public readonly cap: number) {
+  constructor(
+    public readonly bytes: number,
+    public readonly cap: number,
+  ) {
     super(`JSON input is ${bytes} bytes; cap is ${cap}`)
     this.name = 'JsonSizeError'
   }

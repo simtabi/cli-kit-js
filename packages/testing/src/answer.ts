@@ -10,7 +10,7 @@
 
 import type { KeyEvent, MemoryAdapter } from '@simtabi/cli-kit-js-io'
 
-type Key = string | Partial<KeyEvent> & { readonly name: string }
+type Key = string | (Partial<KeyEvent> & { readonly name: string })
 
 interface AnswerFn {
   (io: MemoryAdapter, ...keys: readonly Key[]): void
@@ -29,7 +29,7 @@ function queueKeys(io: MemoryAdapter, keys: readonly Key[]): void {
 }
 
 export const answer: AnswerFn = Object.assign(
-  function (io: MemoryAdapter, ...keys: readonly Key[]): void {
+  (io: MemoryAdapter, ...keys: readonly Key[]): void => {
     queueKeys(io, keys)
   },
   {

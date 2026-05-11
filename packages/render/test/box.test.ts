@@ -57,12 +57,13 @@ describe('box', () => {
     expect(out.split('\n')[0]).toContain('TITLE')
   })
 
-  it('handles CJK width', () => {
+  it('handles CJK width', async () => {
+    // Each CJK character is 1 code unit but 2 columns. Compare visible
+    // *width* across lines, not string length.
+    const { width } = await import('@simtabi/cli-kit-js-text')
     const out = box('日本')
     const lines = out.split('\n')
-    const lengths = new Set(lines.map((l) => l.length))
-    // String length will differ because CJK chars take 2 columns but 1 char,
-    // so we check the inner line by column-stripping.
-    expect(lengths.size).toBe(1)
+    const widths = new Set(lines.map((l) => width(l)))
+    expect(widths.size).toBe(1)
   })
 })

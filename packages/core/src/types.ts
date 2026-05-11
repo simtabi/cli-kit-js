@@ -2,8 +2,8 @@
  * Public types for `@simtabi/cli-kit-js-core`.
  */
 
-import type { ArgDef, ParseError } from '@simtabi/cli-kit-js-parser'
 import type { IOAdapter } from '@simtabi/cli-kit-js-io'
+import type { ArgDef, ParseError } from '@simtabi/cli-kit-js-parser'
 
 export interface CommandMeta {
   readonly name: string
@@ -53,7 +53,9 @@ export interface Command<A extends ArgsRecord = ArgsRecord> {
   /** Main action. */
   readonly run?: (ctx: RunContext<A>) => Promise<unknown> | unknown
   /** Run after `run` (always, even on error). */
-  readonly cleanup?: (ctx: RunContext<A> & { readonly error?: unknown; readonly result?: unknown }) => Promise<void> | void
+  readonly cleanup?: (
+    ctx: RunContext<A> & { readonly error?: unknown; readonly result?: unknown },
+  ) => Promise<void> | void
   /** Plugins / middleware. */
   readonly plugins?: readonly Plugin[]
 }
@@ -110,9 +112,7 @@ export interface HookPayloads {
   readonly 'on:exit': { readonly code: number }
 }
 
-export type HookHandler<E extends HookEvent> = (
-  payload: HookPayloads[E],
-) => Promise<void> | void
+export type HookHandler<E extends HookEvent> = (payload: HookPayloads[E]) => Promise<void> | void
 
 export interface Plugin {
   readonly name: string

@@ -18,14 +18,7 @@
  */
 
 import type { ArgDef } from '@simtabi/cli-kit-js-parser'
-import type {
-  ArgsRecord,
-  Command,
-  CommandMeta,
-  Plugin,
-  RunContext,
-  SubCommands,
-} from './types'
+import type { ArgsRecord, Command, CommandMeta, Plugin, RunContext, SubCommands } from './types'
 
 export function defineCommand<A extends ArgsRecord>(config: Command<A>): Command<A> {
   assertValid(config)
@@ -85,10 +78,7 @@ export interface CommandBuilder<A extends ArgsRecord = Record<never, ArgDef>> {
     type: ArgDef['type'],
     def?: D,
   ): CommandBuilder<A & Record<K, ArgDef>>
-  flag<K extends string>(
-    name: K,
-    def?: Omit<ArgDef, 'type'>,
-  ): CommandBuilder<A & Record<K, ArgDef>>
+  flag<K extends string>(name: K, def?: Omit<ArgDef, 'type'>): CommandBuilder<A & Record<K, ArgDef>>
   positional<K extends string>(
     name: K,
     def?: Omit<ArgDef, 'type'>,
@@ -99,7 +89,9 @@ export interface CommandBuilder<A extends ArgsRecord = Record<never, ArgDef>> {
   setup(fn: (ctx: RunContext<A>) => Promise<void> | void): CommandBuilder<A>
   action(fn: (ctx: RunContext<A>) => Promise<unknown> | unknown): CommandBuilder<A>
   cleanup(
-    fn: (ctx: RunContext<A> & { readonly error?: unknown; readonly result?: unknown }) => Promise<void> | void,
+    fn: (
+      ctx: RunContext<A> & { readonly error?: unknown; readonly result?: unknown },
+    ) => Promise<void> | void,
   ): CommandBuilder<A>
   build(): Command<A>
 }

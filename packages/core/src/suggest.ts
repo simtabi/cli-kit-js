@@ -33,21 +33,20 @@ function levenshtein(a: string, b: string): number {
   if (a === b) return 0
   if (a.length === 0) return b.length
   if (b.length === 0) return a.length
-  if (a.length > b.length) {
-    const tmp = a
-    a = b
-    b = tmp
-  }
-  const m = a.length
-  const n = b.length
+  // Ensure `short` is the smaller string so the inner loop's allocation
+  // stays bounded by min(|a|, |b|).
+  const short = a.length > b.length ? b : a
+  const long = a.length > b.length ? a : b
+  const m = short.length
+  const n = long.length
   let prev = new Array<number>(m + 1)
   let curr = new Array<number>(m + 1)
   for (let i = 0; i <= m; i++) prev[i] = i
   for (let j = 1; j <= n; j++) {
     curr[0] = j
-    const bChar = b.charCodeAt(j - 1)
+    const bChar = long.charCodeAt(j - 1)
     for (let i = 1; i <= m; i++) {
-      const cost = a.charCodeAt(i - 1) === bChar ? 0 : 1
+      const cost = short.charCodeAt(i - 1) === bChar ? 0 : 1
       const prevI = prev[i] ?? 0
       const currI1 = curr[i - 1] ?? 0
       const prevI1 = prev[i - 1] ?? 0

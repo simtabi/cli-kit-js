@@ -27,12 +27,7 @@ function renderChildren(
     const isLast = i === lastIdx
     out.push(`${prefix}${isLast ? chars.last : chars.branch}${child.label}`)
     if (child.children && child.children.length > 0) {
-      renderChildren(
-        child.children,
-        prefix + (isLast ? chars.space : chars.vertical),
-        out,
-        chars,
-      )
+      renderChildren(child.children, prefix + (isLast ? chars.space : chars.vertical), out, chars)
     }
   }
 }

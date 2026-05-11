@@ -15,7 +15,7 @@
  *     when the AbortSignal fires.
  */
 
-import { detectCapabilities, sanitize, strip, type Capabilities } from '@simtabi/cli-kit-js-ansi'
+import { type Capabilities, detectCapabilities, sanitize, strip } from '@simtabi/cli-kit-js-ansi'
 import type { IOAdapter, KeyEvent, ResizeListener } from './types'
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -150,12 +150,14 @@ function applyCodes(state: StyleState, codes: readonly number[]): StyleState {
       delete next.bg
       continue
     }
-    if (c in BASIC_FG) {
-      next.fg = BASIC_FG[c]
+    const fgVal = BASIC_FG[c]
+    if (fgVal !== undefined) {
+      next.fg = fgVal
       continue
     }
-    if (c in BASIC_BG) {
-      next.bg = BASIC_BG[c]
+    const bgVal = BASIC_BG[c]
+    if (bgVal !== undefined) {
+      next.bg = bgVal
       continue
     }
     if (c === 38 || c === 48) {
@@ -240,7 +242,6 @@ interface PendingLine {
 
 class DomAdapter implements IOAdapter {
   readonly #mount: Element
-  readonly #cspNonce: string | undefined
   readonly #columns: number
   readonly #rows: number
   readonly #capabilities: Capabilities
@@ -259,7 +260,9 @@ class DomAdapter implements IOAdapter {
       )
     }
     this.#mount = mount
-    this.#cspNonce = opts.cspNonce
+    // opts.cspNonce reserved for future <style nonce="…"> emission; stored
+    // implicitly by the API contract but unused today.
+    void opts.cspNonce
     this.#columns = opts.columns ?? 80
     this.#rows = opts.rows ?? 24
 
@@ -284,9 +287,7 @@ class DomAdapter implements IOAdapter {
 
   writeRaw(chunk: string): void {
     // writeRaw skips ANSI sanitisation. We still HTML-escape via textContent.
-    const segments: Array<{ text: string; state: StyleState }> = [
-      { text: chunk, state: {} },
-    ]
+    const segments: Array<{ text: string; state: StyleState }> = [{ text: chunk, state: {} }]
     this.#emitSegments(segments, false)
   }
 

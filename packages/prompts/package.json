@@ -28,7 +28,16 @@
   "files": ["dist", "README.md", "LICENSE"],
   "engines": { "node": ">=22.0.0" },
   "sideEffects": false,
-  "keywords": ["cli", "cli-kit", "prompt", "interactive", "input", "select", "password", "typescript"],
+  "keywords": [
+    "cli",
+    "cli-kit",
+    "prompt",
+    "interactive",
+    "input",
+    "select",
+    "password",
+    "typescript"
+  ],
   "publishConfig": {
     "access": "public",
     "provenance": true

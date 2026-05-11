@@ -18,7 +18,6 @@
  * a `cancelled` result with the conventional UNIX exit code.
  */
 
-import { parse, type ParseError } from '@simtabi/cli-kit-js-parser'
 import {
   EXIT_ERROR,
   EXIT_SIGHUP,
@@ -30,17 +29,12 @@ import {
   TerminalGuard,
   createNodeStdio,
 } from '@simtabi/cli-kit-js-io'
-import { renderHelp, type HelpFormat } from './help'
+import { type ParseError, parse } from '@simtabi/cli-kit-js-parser'
+import { type HelpFormat, renderHelp } from './help'
 import { HookBus } from './hooks'
 import { resolveSubCommand } from './lazy'
 import { suggest } from './suggest'
-import type {
-  ArgsRecord,
-  Command,
-  RunContext,
-  RunOptions,
-  RunResult,
-} from './types'
+import type { ArgsRecord, Command, RunContext, RunOptions, RunResult } from './types'
 
 export async function run<A extends ArgsRecord>(
   command: Command<A>,
@@ -65,12 +59,15 @@ export async function run<A extends ArgsRecord>(
   }
 
   const argv = opts.argv ?? readArgv()
-  const bus = new HookBus({ strict: opts.strictPlugins, io })
+  const bus = new HookBus({
+    ...(opts.strictPlugins !== undefined && { strict: opts.strictPlugins }),
+    io,
+  })
   if (command.plugins) bus.register(command.plugins)
 
   let result: RunResult
   try {
-    result = await runInternal(command, argv, io, signal, bus, [command.meta.name])
+    result = await runInternal(command as Command, argv, io, signal, bus, [command.meta.name])
   } catch (error: unknown) {
     // Should never happen — runInternal catches everything — but defensive.
     await bus.emit('on:error', { error })
@@ -90,8 +87,8 @@ export async function run<A extends ArgsRecord>(
   return result
 }
 
-async function runInternal<A extends ArgsRecord>(
-  command: Command<A>,
+async function runInternal(
+  command: Command,
   argv: readonly string[],
   io: IOAdapter,
   signal: AbortSignal,
@@ -154,8 +151,8 @@ async function runInternal<A extends ArgsRecord>(
   }
 
   // 4. Build context
-  const ctx: RunContext<A> = {
-    args: parseResult.result.values as RunContext<A>['args'],
+  const ctx: RunContext = {
+    args: parseResult.result.values as RunContext['args'],
     positional: parseResult.result.positional,
     rest: parseResult.result.rest,
     io,
@@ -165,7 +162,7 @@ async function runInternal<A extends ArgsRecord>(
   }
 
   // 5. Run setup → run → cleanup
-  await bus.emit('before:run', { ctx: ctx as RunContext })
+  await bus.emit('before:run', { ctx })
   let runError: unknown = undefined
   let runResult: unknown = undefined
   try {
@@ -188,13 +185,13 @@ async function runInternal<A extends ArgsRecord>(
   }
 
   if (runError !== undefined) {
-    await bus.emit('on:error', { ctx: ctx as RunContext, error: runError })
+    await bus.emit('on:error', { ctx, error: runError })
     const msg = runError instanceof Error ? runError.message : String(runError)
     io.writeError(`Error: ${msg}\n`)
     return { type: 'runtime-error', code: EXIT_ERROR as 1, error: runError }
   }
 
-  await bus.emit('after:run', { ctx: ctx as RunContext, result: runResult })
+  await bus.emit('after:run', { ctx, result: runResult })
   return { type: 'ok', code: 0, result: runResult }
 }
 
@@ -206,7 +203,7 @@ const HELP_FORMATS: ReadonlySet<HelpFormat> = new Set(['text', 'json', 'markdown
 
 function findHelpFlag(argv: readonly string[]): { format: HelpFormat } | null {
   for (const token of argv) {
-    if (token === '--' ) return null
+    if (token === '--') return null
     if (token === '--help' || token === '-h') return { format: 'text' }
     if (token.startsWith('--help=')) {
       const v = token.slice('--help='.length) as HelpFormat

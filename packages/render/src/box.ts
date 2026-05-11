@@ -72,7 +72,11 @@ export function box(text: string, opts: BoxOptions = {}): string {
   for (let i = 0; i < padding.y; i++) result.push(blankRow)
   for (const line of lines) {
     const padded =
-      chars.v + ' '.repeat(padding.x) + pad(line, maxContent, 'right') + ' '.repeat(padding.x) + chars.v
+      chars.v +
+      ' '.repeat(padding.x) +
+      pad(line, maxContent, 'right') +
+      ' '.repeat(padding.x) +
+      chars.v
     result.push(padded)
   }
   for (let i = 0; i < padding.y; i++) result.push(blankRow)

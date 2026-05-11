@@ -10,16 +10,15 @@
  *      fires `change` events synchronously.
  */
 
-import { loadLayers, type LayerData } from './loader'
+import { type LayerData, loadLayers } from './loader'
 import { cloneNull, deepFreeze, redactSensitive } from './redact'
+import { type ResolvedConfig, resolve } from './resolve'
 import { findFieldDef, getPath, setPath, validateField } from './schema'
-import { resolve, type ResolvedConfig } from './resolve'
 import type {
   ChangeHandler,
   ConfigInstance,
   ConfigValidationError,
   CreateConfigOptions,
-  SchemaLayer,
   SourceInfo,
 } from './types'
 
@@ -102,7 +101,7 @@ class Config implements ConfigInstance {
           error: {
             code: 'UNKNOWN_KEY',
             path,
-            message: `unknown key in schema`,
+            message: 'unknown key in schema',
             layer: 'runtime',
           },
         }
@@ -161,9 +160,7 @@ class Config implements ConfigInstance {
 
   snapshot(opts?: { readonly redactSensitive?: boolean }): Readonly<Record<string, unknown>> {
     const cloned = cloneNull(this.#resolved.values) as Record<string, unknown>
-    const final = opts?.redactSensitive
-      ? redactSensitive(cloned, this.#opts.schema)
-      : cloned
+    const final = opts?.redactSensitive ? redactSensitive(cloned, this.#opts.schema) : cloned
     return deepFreeze(final)
   }
 
@@ -213,17 +210,10 @@ class Config implements ConfigInstance {
   }
 }
 
-function* enumerateLeafPaths(
-  tree: Record<string, unknown>,
-  prefix = '',
-): Generator<string> {
+function* enumerateLeafPaths(tree: Record<string, unknown>, prefix = ''): Generator<string> {
   for (const [key, value] of Object.entries(tree)) {
     const next = prefix ? `${prefix}.${key}` : key
-    if (
-      value !== null &&
-      typeof value === 'object' &&
-      !Array.isArray(value)
-    ) {
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
       yield* enumerateLeafPaths(value as Record<string, unknown>, next)
     } else {
       yield next
@@ -272,8 +262,8 @@ export async function createConfig(opts: CreateConfigOptions): Promise<ConfigIns
   const layers = await loadLayers({
     configDir,
     environment,
-    maxFileBytes: opts.maxFileBytes,
-    maxTotalBytes: opts.maxTotalBytes,
+    ...(opts.maxFileBytes !== undefined && { maxFileBytes: opts.maxFileBytes }),
+    ...(opts.maxTotalBytes !== undefined && { maxTotalBytes: opts.maxTotalBytes }),
   })
   return new Config(opts, env, layers)
 }

@@ -23,7 +23,7 @@ import {
   throwIfAborted,
 } from './render'
 import { SecureString } from './secure-string'
-import { PromptCancelledError, type PasswordPromptOptions } from './types'
+import { type PasswordPromptOptions, PromptCancelledError } from './types'
 
 export async function password(opts: PasswordPromptOptions): Promise<string> {
   const { io, message, validate, signal } = opts
@@ -52,7 +52,6 @@ export async function password(opts: PasswordPromptOptions): Promise<string> {
 
   render()
   try {
-    // biome-ignore lint/correctness/noConstantCondition: prompt loop
     while (true) {
       const key = await io.readKey(sig)
       if (isCancelKey(key)) {

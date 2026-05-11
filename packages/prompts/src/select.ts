@@ -43,7 +43,11 @@ export async function select<T = string>(opts: SelectPromptOptions<T>): Promise<
       const o = options[i]
       if (!o) continue
       const prefix = i === cursor ? POINTER : ' '
-      const label = o.disabled ? colors.gray(o.label) : i === cursor ? colors.cyan(o.label) : o.label
+      const label = o.disabled
+        ? colors.gray(o.label)
+        : i === cursor
+          ? colors.cyan(o.label)
+          : o.label
       io.writeRaw(`${prefix} ${label}`)
       if (o.description && i === cursor) {
         io.writeRaw(`  ${colors.gray(o.description)}`)
@@ -56,7 +60,6 @@ export async function select<T = string>(opts: SelectPromptOptions<T>): Promise<
 
   render(false)
 
-  // biome-ignore lint/correctness/noConstantCondition: prompt loop
   while (true) {
     const key = await io.readKey(sig)
     if (isCancelKey(key)) {
@@ -97,7 +100,7 @@ async function selectNonTTY<T>(opts: SelectPromptOptions<T>): Promise<T> {
     if (!o) continue
     io.write(`  ${i + 1}. ${o.label}${o.disabled ? ' (disabled)' : ''}\n`)
   }
-  io.write('Select [1-' + options.length + ']: ')
+  io.write(`Select [1-${options.length}]: `)
   const line = (await io.readLine(signal ?? new AbortController().signal)).trim()
   const idx = Number.parseInt(line, 10) - 1
   if (Number.isNaN(idx) || idx < 0 || idx >= options.length) {

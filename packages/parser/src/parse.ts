@@ -18,8 +18,8 @@
 import { coerceForType, isEnumValid } from './coerce'
 import { isAllowedKey, nullObject, safeSet } from './keys'
 import {
-  DEFAULT_CAPS,
   type ArgDef,
+  DEFAULT_CAPS,
   type ParseError,
   type ParseErrorCode,
   type ParseOptions,
@@ -181,10 +181,7 @@ export function parse(argv: readonly string[], options: ParseOptions): ParseOutc
       ok: false,
       result: emptyResult(),
       errors: [
-        makeError(
-          'BAD_DEFINITION',
-          e instanceof Error ? e.message : 'invalid arg definitions',
-        ),
+        makeError('BAD_DEFINITION', e instanceof Error ? e.message : 'invalid arg definitions'),
       ],
     }
   }
@@ -384,7 +381,6 @@ export function parse(argv: readonly string[], options: ParseOptions): ParseOutc
         assignValue(values, canonical, def, coerced)
       }
       if (consumedNext) continue
-      continue
     }
 
     // Lone '-' already handled above as positional.
@@ -405,11 +401,7 @@ export function parse(argv: readonly string[], options: ParseOptions): ParseOutc
       assignValue(values, name, def, c.value)
     } else {
       errors.push(
-        makeError(
-          'INVALID_VALUE',
-          `env ${def.env}: ${c.reason}`,
-          { flag: name, value: envVal },
-        ),
+        makeError('INVALID_VALUE', `env ${def.env}: ${c.reason}`, { flag: name, value: envVal }),
       )
     }
   }
@@ -438,9 +430,7 @@ export function parse(argv: readonly string[], options: ParseOptions): ParseOutc
     unknown,
   }
 
-  return errors.length === 0
-    ? { ok: true, result, errors: [] }
-    : { ok: false, result, errors }
+  return errors.length === 0 ? { ok: true, result, errors: [] } : { ok: false, result, errors }
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -505,7 +495,7 @@ function consumeValue(
     return {
       value: undefined,
       nextIndex,
-      error: makeError('MISSING_VALUE', `missing value for option`),
+      error: makeError('MISSING_VALUE', 'missing value for option'),
     }
   }
 
@@ -538,9 +528,7 @@ function mapPositionals(
       for (const raw of remaining) {
         const c = coerceForType(raw, def.type === 'positional' ? 'string' : def.type)
         if (!c.ok) {
-          errors.push(
-            makeError('INVALID_VALUE', `${name}: ${c.reason}`, { value: raw }),
-          )
+          errors.push(makeError('INVALID_VALUE', `${name}: ${c.reason}`, { value: raw }))
           continue
         }
         coerced.push(c.value)

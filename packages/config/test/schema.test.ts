@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  defineSchema,
-  findFieldDef,
-  getDefaults,
-  walkSchema,
-} from '../src/index'
+import { defineSchema, findFieldDef, getDefaults, walkSchema } from '../src/index'
 
 describe('defineSchema', () => {
   it('is identity (preserves type)', () => {

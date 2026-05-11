@@ -21,11 +21,7 @@ import {
   isEnterKey,
   throwIfAborted,
 } from './render'
-import {
-  PromptCancelledError,
-  type MultiselectPromptOptions,
-  type SelectOption,
-} from './types'
+import { type MultiselectPromptOptions, PromptCancelledError, type SelectOption } from './types'
 
 export async function multiselect<T = string>(opts: MultiselectPromptOptions<T>): Promise<T[]> {
   const { io, message, options, signal } = opts
@@ -61,11 +57,7 @@ export async function multiselect<T = string>(opts: MultiselectPromptOptions<T>)
       const isSelected = selected.has(i)
       const pointer = isCursor ? POINTER : ' '
       const bullet = isSelected ? BULLET_ON : BULLET_OFF
-      const label = o.disabled
-        ? colors.gray(o.label)
-        : isCursor
-          ? colors.cyan(o.label)
-          : o.label
+      const label = o.disabled ? colors.gray(o.label) : isCursor ? colors.cyan(o.label) : o.label
       io.writeRaw(`${pointer} ${bullet} ${label}\n`)
       lines++
     }
@@ -78,7 +70,6 @@ export async function multiselect<T = string>(opts: MultiselectPromptOptions<T>)
 
   render(false)
 
-  // biome-ignore lint/correctness/noConstantCondition: prompt loop
   while (true) {
     const key = await io.readKey(sig)
     if (isCancelKey(key)) throw new PromptCancelledError()

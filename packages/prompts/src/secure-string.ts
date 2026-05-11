@@ -76,7 +76,7 @@ export class SecureString {
     if (this.#length === 0) return
     // Walk back from the tail to find the previous codepoint boundary.
     let i = this.#length - 1
-    while (i > 0 && (this.#buf[i]! & 0xc0) === 0x80) {
+    while (i > 0 && ((this.#buf[i] ?? 0) & 0xc0) === 0x80) {
       // continuation byte; keep walking
       i--
     }

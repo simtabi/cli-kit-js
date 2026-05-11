@@ -32,7 +32,10 @@ const ST = `(?:\\u0007|${ESC}\\\\)` // BEL or ESC \
 // CSI: ESC [ params final
 // params: 0–256 chars in 0x30..0x3F (0-9 : ; < = > ?) and 0x20..0x2F intermediate
 // final: 0x40..0x7E
-const CSI_RE = new RegExp(`${ESC}\\[[\\u0030-\\u003F]{0,256}[\\u0020-\\u002F]{0,256}[\\u0040-\\u007E]`, 'g')
+const CSI_RE = new RegExp(
+  `${ESC}\\[[\\u0030-\\u003F]{0,256}[\\u0020-\\u002F]{0,256}[\\u0040-\\u007E]`,
+  'g',
+)
 
 // Specifically SGR: CSI with final byte 'm'
 const SGR_RE = new RegExp(`${ESC}\\[[\\u0030-\\u003F]{0,256}[\\u0020-\\u002F]{0,256}m`, 'g')

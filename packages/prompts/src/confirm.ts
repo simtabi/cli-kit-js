@@ -7,15 +7,8 @@
  * anything else: ignored. Ctrl+C / Escape cancel.
  */
 
-import {
-  ARROW,
-  Q_MARK,
-  clearCurrentLine,
-  isCancelKey,
-  isEnterKey,
-  throwIfAborted,
-} from './render'
-import { PromptCancelledError, type ConfirmPromptOptions } from './types'
+import { ARROW, Q_MARK, clearCurrentLine, isCancelKey, isEnterKey, throwIfAborted } from './render'
+import { type ConfirmPromptOptions, PromptCancelledError } from './types'
 
 export async function confirm(opts: ConfirmPromptOptions): Promise<boolean> {
   const { io, message, signal } = opts
@@ -25,9 +18,7 @@ export async function confirm(opts: ConfirmPromptOptions): Promise<boolean> {
   if (!io.isTTY) {
     const yn = defaultValue ? 'Y/n' : 'y/N'
     io.write(`${message} (${yn}) `)
-    const line = (
-      await io.readLine(signal ?? new AbortController().signal)
-    ).trim().toLowerCase()
+    const line = (await io.readLine(signal ?? new AbortController().signal)).trim().toLowerCase()
     if (line === '') return defaultValue
     if (line === 'y' || line === 'yes') return true
     if (line === 'n' || line === 'no') return false
@@ -43,7 +34,6 @@ export async function confirm(opts: ConfirmPromptOptions): Promise<boolean> {
   }
   render()
 
-  // biome-ignore lint/correctness/noConstantCondition: prompt loop
   while (true) {
     const key = await io.readKey(sig)
     if (isCancelKey(key)) {

@@ -33,7 +33,7 @@ const demo = defineCommand({
   },
   args: {
     only: {
-      type: 'enum',
+      type: 'string',
       alias: 'o',
       values: [...SECTIONS],
       description: 'Render a single section instead of all',
@@ -44,13 +44,15 @@ const demo = defineCommand({
     const sections = requested ? [requested] : SECTIONS
 
     for (const s of sections) {
-      io.write(`\n${colors.bold(colors.cyan('— ' + s + ' —'))}\n\n`)
+      io.write(`\n${colors.bold(colors.cyan(`— ${s} —`))}\n\n`)
       switch (s) {
         case 'banner':
           io.write(`${banner('cli-kit-js')}\n`)
           break
         case 'box':
-          io.write(`${box('Hello, World!', { style: 'round', padding: { x: 2, y: 1 }, title: 'greeting' })}\n`)
+          io.write(
+            `${box('Hello, World!', { style: 'round', padding: { x: 2, y: 1 }, title: 'greeting' })}\n`,
+          )
           io.write(`\n${box(colors.green('All systems nominal.'), { style: 'double' })}\n`)
           break
         case 'table':
@@ -87,7 +89,10 @@ const demo = defineCommand({
                 { label: 'parser' },
                 { label: 'ansi' },
                 { label: 'text' },
-                { label: 'io', children: [{ label: 'node' }, { label: 'dom' }, { label: 'console' }] },
+                {
+                  label: 'io',
+                  children: [{ label: 'node' }, { label: 'dom' }, { label: 'console' }],
+                },
                 { label: 'render', children: [{ label: 'html' }] },
                 { label: 'config' },
                 { label: 'core' },

@@ -223,11 +223,7 @@ function validateArray(def: FieldDef, raw: unknown): ValidateResult {
 // dot-path tree manipulation
 // ──────────────────────────────────────────────────────────────────────────────
 
-const FORBIDDEN_KEYS: ReadonlySet<string> = new Set([
-  '__proto__',
-  'prototype',
-  'constructor',
-])
+const FORBIDDEN_KEYS: ReadonlySet<string> = new Set(['__proto__', 'prototype', 'constructor'])
 
 export function setPath(obj: Record<string, unknown>, dotPath: string, value: unknown): boolean {
   const parts = dotPath.split('.')

@@ -27,11 +27,7 @@ export interface WrapOptions {
  * Truncate `input` to at most `columns` columns. Appends `ellipsis` (default
  * "…") if truncation occurred.
  */
-export function truncate(
-  input: string,
-  columns: number,
-  opts: TruncateOptions = {},
-): string {
+export function truncate(input: string, columns: number, opts: TruncateOptions = {}): string {
   if (columns <= 0) return ''
   const w = width(input)
   if (w <= columns) return input
@@ -97,14 +93,15 @@ function takeColumns(s: string, n: number, fromEnd = false): { text: string; use
 
 /**
  * Pad a string with `fill` (default " ") to reach `columns` columns.
- * If already wider, returns unchanged.
+ *
+ * `side` follows the standard alignment convention:
+ *   - `'left'` — text on the left edge, padding fills the right (default).
+ *   - `'right'` — text on the right edge, padding fills the left.
+ *   - `'center'` — text centred, padding split on both sides.
+ *
+ * Returns the input unchanged if already at or wider than `columns`.
  */
-export function pad(
-  input: string,
-  columns: number,
-  side: PadSide = 'right',
-  fill = ' ',
-): string {
+export function pad(input: string, columns: number, side: PadSide = 'left', fill = ' '): string {
   if (fill.length === 0) return input
   const w = width(input)
   if (w >= columns) return input
@@ -112,8 +109,8 @@ export function pad(
   if (fillW === 0) return input
   const need = columns - w
 
-  if (side === 'left') return repeatToWidth(fill, fillW, need) + input
-  if (side === 'right') return input + repeatToWidth(fill, fillW, need)
+  if (side === 'left') return input + repeatToWidth(fill, fillW, need)
+  if (side === 'right') return repeatToWidth(fill, fillW, need) + input
   // center
   const half = Math.floor(need / 2)
   return repeatToWidth(fill, fillW, half) + input + repeatToWidth(fill, fillW, need - half)
@@ -151,45 +148,55 @@ export function wrap(input: string, columns: number, opts: WrapOptions = {}): st
 
 function wrapLine(line: string, columns: number, hard: boolean, trim: boolean): string[] {
   if (width(line) <= columns) return [line]
-  const words = line.split(/(\s+)/) // keep whitespace tokens
+
+  // Split on whitespace runs and drop them; continuation lines get a single
+  // leading space (unless `trim` is set). This preserves a visible indent
+  // for soft-wrapped continuations while avoiding lone-whitespace lines.
+  const words = line.split(/\s+/).filter((w) => w.length > 0)
+  if (words.length === 0) return [line]
+
   const lines: string[] = []
-  let current = ''
-  let currentW = 0
-  for (const word of words) {
-    const wW = width(word)
-    if (currentW + wW <= columns) {
-      current += word
-      currentW += wW
+  let current = words[0] ?? ''
+
+  // Hard-break the very first word if it already exceeds the column budget.
+  if (hard && width(current) > columns) {
+    let chunk = current
+    while (width(chunk) > columns) {
+      const { text } = takeColumns(chunk, columns)
+      lines.push(text)
+      chunk = chunk.slice(text.length)
+    }
+    current = chunk
+  }
+
+  for (let i = 1; i < words.length; i++) {
+    const word = words[i] ?? ''
+    if (word.length === 0) continue
+    const candidate = `${current} ${word}`
+    if (width(candidate) <= columns) {
+      current = candidate
       continue
     }
-    // Doesn't fit
-    if (current) {
-      lines.push(current)
-      current = ''
-      currentW = 0
-    }
-    // Trim leading whitespace on continuation lines if asked
-    if (trim && /^\s+$/.test(word)) continue
-    if (wW <= columns) {
-      current = word
-      currentW = wW
-    } else if (hard) {
-      // Break word
-      let chunk = word
+    // Doesn't fit — push current and start a new line.
+    lines.push(current)
+    const prefix = trim ? '' : ' '
+
+    // Hard-break only if the word ITSELF exceeds the column budget. Words
+    // that fit but whose leading-space prefix pushes the line one column
+    // over are kept as-is — the deliberate visual indent of a soft-wrap.
+    if (hard && width(word) > columns) {
+      let chunk = `${prefix}${word}`
       while (width(chunk) > columns) {
         const { text } = takeColumns(chunk, columns)
         lines.push(text)
         chunk = chunk.slice(text.length)
       }
       current = chunk
-      currentW = width(chunk)
     } else {
-      // Overflow without breaking
-      current = word
-      currentW = wW
+      current = `${prefix}${word}`
     }
   }
-  if (current) lines.push(current)
+  if (current.length > 0) lines.push(current)
   return lines
 }
 

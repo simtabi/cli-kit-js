@@ -16,7 +16,7 @@ export function redactSensitive(
   values: Readonly<Record<string, unknown>>,
   schema: Schema,
 ): Record<string, unknown> {
-  const out: Record<string, unknown> = cloneNull(values)
+  const out = cloneNull(values) as Record<string, unknown>
   walkSchema(schema, (path, def) => {
     if (!def.sensitive && !def.secret) return
     const v = getPath(out, path)

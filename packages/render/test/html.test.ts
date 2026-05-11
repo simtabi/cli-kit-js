@@ -39,7 +39,9 @@ describe('ansiToHtml', () => {
   })
 
   it('handles 256-color cube', () => {
-    expect(ansiToHtml('\x1b[38;5;208morange\x1b[39m')).toMatch(/<span style="color: rgb\(.*\)">orange<\/span>/)
+    expect(ansiToHtml('\x1b[38;5;208morange\x1b[39m')).toMatch(
+      /<span style="color: rgb\(.*\)">orange<\/span>/,
+    )
   })
 
   it('drops disallowed (non-SGR) escapes', () => {
@@ -48,11 +50,14 @@ describe('ansiToHtml', () => {
     expect(ansiToHtml('\x1b[2Jhi')).toBe('hi')
   })
 
-  it('never emits <script>', () => {
+  it('never emits an open <script tag', () => {
+    // The dangerous part is `<script` — `alert(...)` as inert text is safe
+    // because the `<` is escaped to `&lt;`.
     const adversarial = `\x1b[31m<script>alert("x")</script>\x1b[39m`
     const out = ansiToHtml(adversarial)
     expect(out).not.toContain('<script')
-    expect(out).not.toContain('alert(')
+    expect(out).not.toContain('</script')
+    expect(out).toContain('&lt;script&gt;')
   })
 
   it('never emits event handlers in attribute position', () => {

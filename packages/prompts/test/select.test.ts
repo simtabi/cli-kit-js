@@ -34,9 +34,7 @@ describe('select prompt', () => {
   it('initial cursor position', async () => {
     const io = tty()
     answer(io, 'enter')
-    expect(
-      await select({ io, message: 'choose', options: opts, initial: 2 }),
-    ).toBe('c')
+    expect(await select({ io, message: 'choose', options: opts, initial: 2 })).toBe('c')
   })
 
   it('skips disabled options', async () => {

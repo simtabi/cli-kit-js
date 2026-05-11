@@ -231,7 +231,9 @@ describe('parse: prototype pollution defense', () => {
   it('rejects __proto__ as flag name', () => {
     const r = parse(['--__proto__=polluted'], { args: {}, strict: true })
     expect(r.ok).toBe(false)
-    expect(r.errors.some((e) => e.code === 'POLLUTION_ATTEMPT' || e.code === 'UNKNOWN_FLAG')).toBe(true)
+    expect(r.errors.some((e) => e.code === 'POLLUTION_ATTEMPT' || e.code === 'UNKNOWN_FLAG')).toBe(
+      true,
+    )
     // Confirm Object.prototype not polluted
     // biome-ignore lint/suspicious/noExplicitAny: introspecting pollution
     expect(({} as any).polluted).toBeUndefined()

@@ -4,13 +4,7 @@
  */
 
 import type { LayerData } from './loader'
-import {
-  findFieldDef,
-  getPath,
-  setPath,
-  validateField,
-  walkSchema,
-} from './schema'
+import { findFieldDef, getPath, setPath, validateField, walkSchema } from './schema'
 import type {
   ConfigValidationError,
   CreateConfigOptions,
@@ -41,10 +35,7 @@ export interface ResolveInputs {
   readonly strict: boolean
 }
 
-export function resolve(
-  inputs: ResolveInputs,
-  _opts?: CreateConfigOptions,
-): ResolvedConfig {
+export function resolve(inputs: ResolveInputs, _opts?: CreateConfigOptions): ResolvedConfig {
   const { schema, layers, env, cli, runtime, envPrefix } = inputs
   const values: Record<string, unknown> = Object.create(null)
   const sources = new Map<string, SourceInfo>()
@@ -152,7 +143,7 @@ export function resolve(
       errors.push({
         code: 'MISSING_REQUIRED',
         path,
-        message: `missing required field`,
+        message: 'missing required field',
       })
     }
   })
@@ -195,10 +186,7 @@ function readCliValue(
   return getPath(cli as Record<string, unknown>, fallbackPath)
 }
 
-function* enumerateLeafPaths(
-  tree: Record<string, unknown>,
-  prefix = '',
-): Generator<string> {
+function* enumerateLeafPaths(tree: Record<string, unknown>, prefix = ''): Generator<string> {
   for (const [key, value] of Object.entries(tree)) {
     const next = prefix ? `${prefix}.${key}` : key
     if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
