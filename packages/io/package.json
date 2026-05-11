@@ -67,6 +67,18 @@
       "path": "dist/index.js",
       "limit": "5 KB",
       "gzip": true
+    },
+    {
+      "name": "DOM adapter ESM",
+      "path": "dist/dom.js",
+      "limit": "5 KB",
+      "gzip": true
+    },
+    {
+      "name": "Console adapter ESM",
+      "path": "dist/console.js",
+      "limit": "3 KB",
+      "gzip": true
     }
   ],
   "dependencies": {
@@ -76,6 +88,7 @@
     "@size-limit/preset-small-lib": "catalog:",
     "@types/node": "catalog:",
     "fast-check": "catalog:",
+    "jsdom": "catalog:",
     "size-limit": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
