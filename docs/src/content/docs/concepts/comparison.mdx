@@ -1,0 +1,101 @@
+---
+title: How it compares
+description: cli-kit-js vs citty, commander, yargs, clack — honest tradeoffs.
+sidebar:
+  order: 4
+---
+
+import { Aside } from '@astrojs/starlight/components'
+
+`cli-kit-js` makes a specific set of trade-offs that you should weigh against the alternatives.
+
+## At a glance
+
+| Capability                              | cli-kit-js | citty | commander | yargs | clack |
+| --------------------------------------- | :--------: | :---: | :-------: | :---: | :---: |
+| Argv parser                              | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Subcommands                              | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Async-correct runner + AbortSignal       | ✅ | ✅ | ⚠️ | ⚠️ | n/a |
+| Plugin / hook bus                        | ✅ | ✅ | ⚠️ | ✅ | n/a |
+| Interactive prompts                      | ✅ | ❌ | ❌ | ❌ | ✅ |
+| Layered config (`./config/*.{env}.json`) | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Pretty output (box / table / tree)       | ✅ | ❌ | ❌ | ❌ | ✅ |
+| Spinner + progress                       | ✅ | ❌ | ❌ | ❌ | ✅ |
+| ANSI → HTML conversion                   | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Browser DOM adapter (rendering)          | ✅ | ❌ | ❌ | ❌ | ❌ |
+| DevTools console adapter (`%c`)          | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Zero runtime dependencies                | ✅ | ⚠️ | ✅ | ⚠️ | ⚠️ |
+| Prototype-pollution-safe JSON parsing    | ✅ | ❌ | ❌ | ❌ | n/a |
+| `SecureString` for password buffers      | ✅ | ❌ | ❌ | ❌ | ❌ |
+| npm provenance attestations              | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| Property-based fuzz on parser            | ✅ | ❌ | ❌ | ❌ | n/a |
+| TypeScript-native                        | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| Bundle size (typical use)                | small | small | small | medium | small |
+
+✅ first-class · ⚠️ partial / via plugin · ❌ not provided · n/a not applicable
+
+## Where each tool is better
+
+### citty (unjs)
+
+[`citty`](https://github.com/unjs/citty) is the closest analogue to `cli-kit-js-core`. It's smaller, citty itself has fewer concepts, and its TypeScript inference is excellent.
+
+**Pick citty when:** you only need argv → typed args + subcommands + help. You don't want prompts, rendering, config layering, or browser support. You're already in the unjs ecosystem (Nitro, Nuxt, Nuxi).
+
+**Pick `cli-kit-js`** when you need any of the above on top.
+
+### commander (TJ)
+
+[`commander`](https://github.com/tj/commander.js) is the most-installed Node CLI library by far. Mature, predictable, used by thousands of CLIs. Its API has more legacy than cli-kit-js's.
+
+**Pick commander when:** you're starting a one-file CLI script and want the most boring, well-trodden path. Your team already knows commander idioms.
+
+**Pick `cli-kit-js`** when you want a typed builder, lifecycle hooks, layered config, prompts, or any browser story.
+
+### yargs
+
+[`yargs`](https://github.com/yargs/yargs) is the feature-richest argv parser in the ecosystem. Middleware, command builders, async coercers, i18n out of the box. Its install footprint is the heaviest of the four argv-parsers compared.
+
+**Pick yargs when:** you specifically want yargs' parsing model (fluent builder + middleware + advanced coercions). You're OK with the install size.
+
+**Pick `cli-kit-js`** when you want a smaller surface, async-correct lifecycle, rendering, prompts, config.
+
+### clack (`@clack/prompts`)
+
+[`clack`](https://github.com/bombsh/clack) is the gold standard for modern terminal prompts in 2026. Its prompt UX is excellent and a major influence on `cli-kit-js-prompts`.
+
+**Pick clack when:** you're building a prompt-heavy installer/generator and don't need an argv parser, runner, or config layer. You want the most polished prompt experience available right now.
+
+**Pick `cli-kit-js`** when you also need a CLI framework around the prompts, or when you want browser-side rendering.
+
+## Where `cli-kit-js` is better
+
+These are the things the kit does that the alternatives don't (or don't all do):
+
+- **Multi-runtime.** Same code runs in Node, Deno, Bun, and the browser. The IOAdapter abstraction makes adapter swapping a one-line change.
+- **Browser rendering.** DOM adapter and DevTools console adapter, both XSS-safe. ANSI→HTML conversion as a separate subpath. No competitor renders to a `<div>`.
+- **Layered config built in.** `./config/*.{env}.json` + env + CLI + runtime, schema-driven, prototype-pollution-safe. citty/commander/yargs leave config to the consumer.
+- **Single security posture across the surface.** Threat model, audit checklist, fuzz-tested parser + ansi sanitiser + ansi-html, `SecureString` for password buffers, npm provenance, OSSF Scorecard. The alternatives each cover parts; cli-kit-js covers the whole flow.
+- **Zero runtime dependencies, CI-enforced.** Every package ships with an empty `dependencies` field except workspace siblings. A PR introducing a third-party runtime dep fails the build.
+- **`cli-kit-js-testing` shipped alongside.** `MemoryAdapter` + matchers + scripted-prompt driver + snapshot helpers + scoped time/env mocks. Not bolted on; designed in.
+
+## Where `cli-kit-js` is worse
+
+Honest list. These cost real adoption.
+
+- **New.** First release; commander has 15 years of battle-testing on every conceivable shell.
+- **Bigger meta surface than citty.** If all you need is argv parsing, citty wins on simplicity.
+- **No middleware pattern like yargs.** Hooks cover most of it but the mental model differs.
+- **Prompt UX is good, not yet best-in-class.** clack's animations and visual polish are ahead.
+- **Browser-interactive prompts not yet shipped.** DOM rendering works; prompts in browser need the M7 work (planned). The `cursorMoves` capability flag is wired to make this a non-breaking addition.
+
+## When to migrate
+
+You shouldn't migrate a working CLI from commander to `cli-kit-js` just to have it. Reasonable reasons:
+
+- You're starting a new CLI and want a single library covering argv + prompts + rendering + config.
+- You're rewriting a CLI to also work in the browser (this is the unique selling point).
+- Your security posture demands a smaller, audit-defensible dependency tree.
+- You want layered config without bringing in `cosmiconfig` / `convict` / `node-config`.
+
+If none of those apply, stick with what you've got.

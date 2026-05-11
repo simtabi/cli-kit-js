@@ -70,7 +70,7 @@ Once 0.1.0 ships, the kit is usable but not yet "best-of-class for v1.0". These 
 
 - ⏳ **2.3** **typedoc API reference.** Generate per-package API docs under `docs/src/content/docs/api/` from each package's `dist/index.d.ts`. Wire into the Starlight sidebar.
 
-- ⏳ **2.4** **Comparison page.** "cli-kit-js vs. citty / commander / yargs / clack" in `docs/src/content/docs/concepts/comparison.mdx`. Honest, including where the others are better.
+- ✅ **2.4** **Comparison page** at `docs/src/content/docs/concepts/comparison.mdx`. Honest 18-capability matrix of cli-kit-js vs citty / commander / yargs / clack. Includes "where each tool is better" and "where cli-kit-js is worse" sections.
 
 - ⏳ **2.5** **Logger improvements.** Currently `core` ships a thin logger. Promote it: structured fields, leveled output (silent/error/warn/info/debug/trace), secret-key auto-redaction by pattern match (`password|token|secret|key|authorization`), per-stream output (console vs file via consumer-supplied sink).
 

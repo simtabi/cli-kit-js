@@ -66,4 +66,17 @@ describe('box', () => {
     const widths = new Set(lines.map((l) => width(l)))
     expect(widths.size).toBe(1)
   })
+
+  it('left-aligns multi-line content (text on left, padding on right)', () => {
+    // Regression: pad() semantics flipped during the Phase 0 fix-pass;
+    // box.ts had `pad(..., 'right')` baked in, producing right-aligned
+    // content. The wizard example surfaced it.
+    const out = box('short\nmuch longer line', { padding: { x: 1, y: 0 } })
+    const lines = out.split('\n')
+    // Middle lines are border + space + content + space + border.
+    // 'short' should be followed by trailing spaces — not preceded by them.
+    const shortLine = lines[1] ?? ''
+    expect(shortLine).toMatch(/^│ short\s+│$/)
+    expect(shortLine).not.toMatch(/^│\s+short │$/)
+  })
 })

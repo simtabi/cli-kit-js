@@ -71,10 +71,11 @@ export function box(text: string, opts: BoxOptions = {}): string {
   const result: string[] = [top]
   for (let i = 0; i < padding.y; i++) result.push(blankRow)
   for (const line of lines) {
+    // Left-align content (text on the left, trailing space fills to maxContent).
     const padded =
       chars.v +
       ' '.repeat(padding.x) +
-      pad(line, maxContent, 'right') +
+      pad(line, maxContent, 'left') +
       ' '.repeat(padding.x) +
       chars.v
     result.push(padded)

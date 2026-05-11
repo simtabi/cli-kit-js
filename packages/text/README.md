@@ -9,7 +9,7 @@ Width-safe text utilities. Part of the [`cli-kit-js`](https://github.com/simtabi
 - `width(s)` — printed column count, ANSI-stripped, Unicode-aware.
 - `truncate(s, n, opts?)` — truncate to `n` columns, preserving ANSI styling.
 - `wrap(s, n, opts?)` — soft-wrap to `n` columns; word boundaries respected.
-- `pad(s, n, side?, fill?)` — pad to `n` columns; `side` is `'left' | 'right' | 'center'`.
+- `pad(s, n, side?, fill?)` — pad to `n` columns. `side` is `'left' | 'right' | 'center'` (default `'left'`) and means "text on the left edge" (etc.) — standard alignment semantics. `pad('hi', 5)` → `'hi   '`.
 - `align(lines, width, side?)` — align a block of lines.
 
 Handles CJK wide characters, emoji presentation forms, zero-width joiners, combining marks, and variation selectors via an inlined Unicode width table (~2 KB).
