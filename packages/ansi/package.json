@@ -38,12 +38,23 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
+    "size": "size-limit",
     "clean": "rm -rf dist .turbo coverage"
   },
+  "size-limit": [
+    {
+      "name": "createColors() + sanitize() ESM",
+      "path": "dist/index.js",
+      "limit": "2 KB",
+      "gzip": true
+    }
+  ],
   "dependencies": {},
   "devDependencies": {
+    "@size-limit/preset-small-lib": "catalog:",
     "@types/node": "catalog:",
     "fast-check": "catalog:",
+    "size-limit": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
