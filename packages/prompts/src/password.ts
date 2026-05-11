@@ -11,11 +11,10 @@
 
 import { colors } from '@simtabi/cli-kit-js-ansi'
 import {
-  ARROW,
-  Q_MARK,
   RESTORE_CURSOR,
   SAVE_CURSOR,
   clearCurrentLine,
+  glyphs,
   isBackspaceKey,
   isCancelKey,
   isEnterKey,
@@ -36,6 +35,7 @@ export async function password(opts: PasswordPromptOptions): Promise<string> {
     return line
   }
 
+  const g = glyphs(io)
   const buffer = new SecureString()
   let charCount = 0 // number of visible chars (for mask rendering)
   let error: string | null = null
@@ -43,7 +43,7 @@ export async function password(opts: PasswordPromptOptions): Promise<string> {
 
   const render = () => {
     clearCurrentLine(io)
-    io.writeRaw(`${Q_MARK} ${message} ${ARROW} ${mask.repeat(charCount)}`)
+    io.writeRaw(`${g.q} ${message} ${g.arrow} ${mask.repeat(charCount)}`)
     io.writeRaw(SAVE_CURSOR)
     io.writeRaw('\n\x1b[K')
     if (error) io.writeRaw(colors.red(`  ${error}`))

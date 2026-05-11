@@ -11,15 +11,7 @@
  */
 
 import { colors } from '@simtabi/cli-kit-js-ansi'
-import {
-  ARROW,
-  POINTER,
-  Q_MARK,
-  clearLinesAbove,
-  isCancelKey,
-  isEnterKey,
-  throwIfAborted,
-} from './render'
+import { clearLinesAbove, glyphs, isCancelKey, isEnterKey, throwIfAborted } from './render'
 import { PromptCancelledError, type SelectOption, type SelectPromptOptions } from './types'
 
 export async function select<T = string>(opts: SelectPromptOptions<T>): Promise<T> {
@@ -31,6 +23,7 @@ export async function select<T = string>(opts: SelectPromptOptions<T>): Promise<
     return selectNonTTY(opts)
   }
 
+  const g = glyphs(io)
   let cursor = clampCursor(opts.initial ?? 0, options)
   const sig = signal ?? new AbortController().signal
   let renderedLines = 0
@@ -38,11 +31,11 @@ export async function select<T = string>(opts: SelectPromptOptions<T>): Promise<
   const render = (clear = true) => {
     if (clear) clearLinesAbove(io, renderedLines - 1)
     let lines = 1
-    io.writeRaw(`${Q_MARK} ${message} ${ARROW}\n`)
+    io.writeRaw(`${g.q} ${message} ${g.arrow}\n`)
     for (let i = 0; i < options.length; i++) {
       const o = options[i]
       if (!o) continue
-      const prefix = i === cursor ? POINTER : ' '
+      const prefix = i === cursor ? g.pointer : ' '
       const label = o.disabled
         ? colors.gray(o.label)
         : i === cursor

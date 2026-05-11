@@ -28,6 +28,16 @@ export function createSpinner(io: IOAdapter, opts: SpinnerOptions = {}): Spinner
   // Animate only on real TTYs with color support — otherwise emit one-shot
   // status lines on start / stop transitions.
   const animated = io.isTTY && io.capabilities.color > 0
+  // Pick Unicode glyphs (✔/✖/⚠/ℹ) when the terminal can render them,
+  // ASCII fallbacks otherwise — terminals on `LANG=C` or stripped locales
+  // would render the Unicode forms as `?`s.
+  const unicode = io.capabilities.unicode
+  const G = {
+    check: unicode ? '✔' : 'OK',
+    cross: unicode ? '✖' : 'X',
+    warn: unicode ? '⚠' : '!',
+    info: unicode ? 'ℹ' : 'i',
+  } as const
 
   function clearLine(): void {
     // CR then erase-to-end-of-line.
@@ -76,16 +86,16 @@ export function createSpinner(io: IOAdapter, opts: SpinnerOptions = {}): Spinner
         return c
       },
       succeed(t?: string) {
-        return c.stop(`${colors.green('✔')} ${t ?? text}`)
+        return c.stop(`${colors.green(G.check)} ${t ?? text}`)
       },
       fail(t?: string) {
-        return c.stop(`${colors.red('✖')} ${t ?? text}`)
+        return c.stop(`${colors.red(G.cross)} ${t ?? text}`)
       },
       warn(t?: string) {
-        return c.stop(`${colors.yellow('⚠')} ${t ?? text}`)
+        return c.stop(`${colors.yellow(G.warn)} ${t ?? text}`)
       },
       info(t?: string) {
-        return c.stop(`${colors.blue('ℹ')} ${t ?? text}`)
+        return c.stop(`${colors.blue(G.info)} ${t ?? text}`)
       },
       update(newText: string) {
         text = newText

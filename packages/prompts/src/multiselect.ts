@@ -10,17 +10,7 @@
  */
 
 import { colors } from '@simtabi/cli-kit-js-ansi'
-import {
-  ARROW,
-  BULLET_OFF,
-  BULLET_ON,
-  POINTER,
-  Q_MARK,
-  clearLinesAbove,
-  isCancelKey,
-  isEnterKey,
-  throwIfAborted,
-} from './render'
+import { clearLinesAbove, glyphs, isCancelKey, isEnterKey, throwIfAborted } from './render'
 import { type MultiselectPromptOptions, PromptCancelledError, type SelectOption } from './types'
 
 export async function multiselect<T = string>(opts: MultiselectPromptOptions<T>): Promise<T[]> {
@@ -32,6 +22,7 @@ export async function multiselect<T = string>(opts: MultiselectPromptOptions<T>)
     return multiselectNonTTY(opts)
   }
 
+  const g = glyphs(io)
   const min = opts.minSelected ?? 0
   const max = opts.maxSelected ?? options.length
   let cursor = 0
@@ -49,14 +40,14 @@ export async function multiselect<T = string>(opts: MultiselectPromptOptions<T>)
   const render = (clear = true) => {
     if (clear) clearLinesAbove(io, renderedLines - 1)
     let lines = 1
-    io.writeRaw(`${Q_MARK} ${message} ${ARROW}\n`)
+    io.writeRaw(`${g.q} ${message} ${g.arrow}\n`)
     for (let i = 0; i < options.length; i++) {
       const o = options[i]
       if (!o) continue
       const isCursor = i === cursor
       const isSelected = selected.has(i)
-      const pointer = isCursor ? POINTER : ' '
-      const bullet = isSelected ? BULLET_ON : BULLET_OFF
+      const pointer = isCursor ? g.pointer : ' '
+      const bullet = isSelected ? g.bulletOn : g.bulletOff
       const label = o.disabled ? colors.gray(o.label) : isCursor ? colors.cyan(o.label) : o.label
       io.writeRaw(`${pointer} ${bullet} ${label}\n`)
       lines++

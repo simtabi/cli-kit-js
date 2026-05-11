@@ -145,4 +145,37 @@ describe('NodeStdioAdapter', () => {
     expect(a).toBe(1)
     expect(b).toBe(2)
   })
+
+  it('readLine drains sequential calls from pre-buffered stdin', async () => {
+    // Regression: each readLine() used to create its own readline.Interface,
+    // which dropped any already-buffered lines. Now a shared interface +
+    // queue serve every reader.
+    const { Readable } = await import('node:stream')
+    const stdin = Readable.from(['one\ntwo\nthree\n'])
+    const io = createNodeStdio({
+      stdout: fakeWriteStream() as unknown as NodeJS.WriteStream,
+      stderr: fakeWriteStream() as unknown as NodeJS.WriteStream,
+      stdin: stdin as unknown as NodeJS.ReadStream,
+    })
+    const ac = new AbortController()
+    const a = await io.readLine(ac.signal)
+    const b = await io.readLine(ac.signal)
+    const c = await io.readLine(ac.signal)
+    expect([a, b, c]).toEqual(['one', 'two', 'three'])
+  })
+
+  it('readLine after EOF resolves to empty string', async () => {
+    const { Readable } = await import('node:stream')
+    const stdin = Readable.from(['only-line\n'])
+    const io = createNodeStdio({
+      stdout: fakeWriteStream() as unknown as NodeJS.WriteStream,
+      stderr: fakeWriteStream() as unknown as NodeJS.WriteStream,
+      stdin: stdin as unknown as NodeJS.ReadStream,
+    })
+    const ac = new AbortController()
+    expect(await io.readLine(ac.signal)).toBe('only-line')
+    // No more input: subsequent reads resolve to ''.
+    expect(await io.readLine(ac.signal)).toBe('')
+    expect(await io.readLine(ac.signal)).toBe('')
+  })
 })

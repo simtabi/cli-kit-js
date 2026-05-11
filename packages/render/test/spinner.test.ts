@@ -71,4 +71,12 @@ describe('spinner: TTY (animation enabled)', () => {
     expect(io.stdout).toContain('✔')
     expect(io.stdout).toContain('ok')
   })
+
+  it('falls back to ASCII glyphs when capabilities.unicode is false', () => {
+    vi.useFakeTimers()
+    const io = new MemoryAdapter({ isTTY: true, color: 24, unicode: false })
+    createSpinner(io, { text: 'work' }).start().succeed('ok')
+    expect(io.stdout).not.toContain('✔')
+    expect(io.stdout).toContain('OK')
+  })
 })

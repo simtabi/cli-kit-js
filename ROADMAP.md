@@ -61,13 +61,7 @@ In the order I'd do them:
 
 Once 0.1.0 ships, the kit is usable but not yet "best-of-class for v1.0". These improvements pay off in adoption.
 
-- ⏳ **2.1** **Performance benchmarks.** Use `mitata` or `tinybench` in a new `bench/` directory. Targets:
-  - parser: 10k argv tokens / sec parsed.
-  - text/width: 1k Unicode strings / sec measured.
-  - render/box: 100 large boxes / sec rendered.
-  - ansi-html conversion: 1k SGR runs / sec.
-
-  Wire to CI as a non-blocking informational job that posts a comment with the deltas.
+- ✅ **2.1** **Performance benchmarks** (`bench/` package). tinybench-based suites for parser, text, render, ansi-html, and config. `pnpm --filter @simtabi/cli-kit-js-bench bench` runs all five suites. Indicative M1 numbers recorded in `bench/README.md` as regression markers (not gated). Highlights: `parse` small argv ~360k ops/s, `ansiToHtml` plain ~970k ops/s, `width` CJK ~11k ops/s (Intl.Segmenter-bound).
 
 - ⏳ **2.2** **More example CLIs.** Beyond the four landing in Phase 0, add:
   - A `init` scaffolder using `text` + `select` prompts to generate a starter project.
@@ -82,7 +76,7 @@ Once 0.1.0 ships, the kit is usable but not yet "best-of-class for v1.0". These 
 
 - ✅ **2.6** **Hyperlink rendering (OSC 8).** `render.link(text, url)` exported from `@simtabi/cli-kit-js-render`. URL scheme allowlist (`http` / `https` / `mailto`); any other scheme falls back to plain `text (url)`. 14 tests + a fast-check invariant proving no OSC 8 link is ever emitted for a disallowed scheme.
 
-- ⏳ **2.7** **Color-blindness / a11y mode.** A `output.theme` config field selecting a high-contrast palette and ASCII symbols fallback. Surfaces through `IOAdapter.capabilities` for renderers to consult.
+- ✅ **2.7** **ASCII glyph fallback** when `capabilities.unicode === false`. Spinner's `✔/✖/⚠/ℹ` → `OK/X/!/i`. Prompt glyphs `›/❯/✔/✖/◉/◯` → `>/>/OK/X/[x]/[ ]`. Tests assert no Unicode chars appear when unicode capability is off. Reasoning: terminals on `LANG=C` / stripped locales would render Unicode forms as `?`-mojibake. A11y high-contrast palette and a dedicated `output.theme` config field deferred until consumer demand.
 
 ---
 

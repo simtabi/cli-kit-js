@@ -42,4 +42,14 @@ describe('confirm prompt', () => {
     answer.line(io, 'yes')
     expect(await confirm({ io, message: '?', default: false })).toBe(true)
   })
+
+  it('uses ASCII glyphs when capabilities.unicode is false', async () => {
+    const io = new MemoryAdapter({ isTTY: true, color: 24, unicode: false })
+    answer(io, 'y')
+    await confirm({ io, message: 'Continue?' })
+    const written = io.rawWrites.join('')
+    // ASCII fallback for the arrow is '>'; Unicode '›' should not appear.
+    expect(written).not.toContain('›')
+    expect(written).toContain('>')
+  })
 })

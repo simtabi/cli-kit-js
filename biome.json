@@ -78,5 +78,17 @@
   },
   "organizeImports": {
     "enabled": true
-  }
+  },
+  "overrides": [
+    {
+      "include": ["bench/**/*.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    }
+  ]
 }

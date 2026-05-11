@@ -7,7 +7,7 @@
  * anything else: ignored. Ctrl+C / Escape cancel.
  */
 
-import { ARROW, Q_MARK, clearCurrentLine, isCancelKey, isEnterKey, throwIfAborted } from './render'
+import { clearCurrentLine, glyphs, isCancelKey, isEnterKey, throwIfAborted } from './render'
 import { type ConfirmPromptOptions, PromptCancelledError } from './types'
 
 export async function confirm(opts: ConfirmPromptOptions): Promise<boolean> {
@@ -27,10 +27,11 @@ export async function confirm(opts: ConfirmPromptOptions): Promise<boolean> {
 
   const yn = defaultValue ? 'Y/n' : 'y/N'
   const sig = signal ?? new AbortController().signal
+  const g = glyphs(io)
 
   const render = () => {
     clearCurrentLine(io)
-    io.writeRaw(`${Q_MARK} ${message} (${yn}) ${ARROW} `)
+    io.writeRaw(`${g.q} ${message} (${yn}) ${g.arrow} `)
   }
   render()
 

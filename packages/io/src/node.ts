@@ -45,6 +45,10 @@ class NodeStdioAdapter implements IOAdapter {
   readonly #stdin: NodeJS.ReadStream
   readonly #resizeListeners = new Set<ResizeListener>()
   #resizeInstalled = false
+  #lineReader: readline.Interface | null = null
+  #lineReaderClosed = false
+  readonly #lineQueue: string[] = []
+  readonly #linePending: Array<(line: string) => void> = []
 
   constructor(opts: NodeStdioAdapterOptions = {}) {
     this.#stdout = opts.stdout ?? process.stdout
@@ -117,33 +121,61 @@ class NodeStdioAdapter implements IOAdapter {
   }
 
   readLine(signal: AbortSignal): Promise<string> {
+    this.#ensureLineReader()
     return new Promise<string>((resolve, reject) => {
       if (signal.aborted) {
         reject(new AbortError())
         return
       }
-      const rl = readline.createInterface({
-        input: this.#stdin,
-        terminal: false,
-        crlfDelay: Number.POSITIVE_INFINITY,
-      })
+      // Drain a buffered line if one's already arrived.
+      const buffered = this.#lineQueue.shift()
+      if (buffered !== undefined) {
+        resolve(buffered)
+        return
+      }
+      if (this.#lineReaderClosed) {
+        // EOF reached and no buffered lines remain — resolve empty.
+        resolve('')
+        return
+      }
       const onAbort = () => {
-        signal.removeEventListener('abort', onAbort)
-        rl.removeAllListeners()
-        rl.close()
+        const idx = this.#linePending.indexOf(handler)
+        if (idx !== -1) this.#linePending.splice(idx, 1)
         reject(new AbortError())
       }
-      signal.addEventListener('abort', onAbort, { once: true })
-      rl.once('line', (line) => {
+      const handler = (line: string) => {
         signal.removeEventListener('abort', onAbort)
-        rl.close()
         resolve(line)
-      })
-      rl.once('close', () => {
-        signal.removeEventListener('abort', onAbort)
-        // 'close' before 'line' means EOF; resolve with empty string.
-        resolve('')
-      })
+      }
+      signal.addEventListener('abort', onAbort, { once: true })
+      this.#linePending.push(handler)
+    })
+  }
+
+  /**
+   * Lazily create one shared `readline.Interface`. Lines flow through a
+   * queue + pending-promise list — every call to `readLine()` either drains
+   * a buffered line, parks until the next one, or returns '' on EOF. This
+   * fixes the bug where creating a fresh Interface per call dropped already-
+   * buffered piped lines.
+   */
+  #ensureLineReader(): void {
+    if (this.#lineReader || this.#lineReaderClosed) return
+    this.#lineReader = readline.createInterface({
+      input: this.#stdin,
+      terminal: false,
+      crlfDelay: Number.POSITIVE_INFINITY,
+    })
+    this.#lineReader.on('line', (line: string) => {
+      const next = this.#linePending.shift()
+      if (next) next(line)
+      else this.#lineQueue.push(line)
+    })
+    this.#lineReader.once('close', () => {
+      this.#lineReaderClosed = true
+      // Wake every parked reader with '' to signal EOF.
+      const pending = this.#linePending.splice(0, this.#linePending.length)
+      for (const p of pending) p('')
     })
   }
 

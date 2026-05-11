@@ -2,6 +2,7 @@ packages:
   - "packages/*"
   - "apps/*"
   - "docs"
+  - "bench"
 
 # Centralized dev-dep versions. Reference via "catalog:" in package.json.
 # Bump versions here, every package picks them up.

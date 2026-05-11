@@ -13,11 +13,10 @@
 
 import { colors } from '@simtabi/cli-kit-js-ansi'
 import {
-  ARROW,
-  Q_MARK,
   RESTORE_CURSOR,
   SAVE_CURSOR,
   clearCurrentLine,
+  glyphs,
   isBackspaceKey,
   isCancelKey,
   isEnterKey,
@@ -29,6 +28,7 @@ import { PromptCancelledError, type TextPromptOptions } from './types'
 export async function text(opts: TextPromptOptions): Promise<string> {
   const { io, message, default: defaultValue, validate, signal } = opts
   throwIfAborted(signal)
+  const g = glyphs(io)
 
   if (!io.isTTY) {
     io.write(`${message} `)
@@ -37,7 +37,7 @@ export async function text(opts: TextPromptOptions): Promise<string> {
     if (validate) {
       const r = validate(value)
       if (r !== true) {
-        io.writeError(`${colors.red('✖')} ${r}\n`)
+        io.writeError(`${g.cross} ${r}\n`)
         throw new Error(r)
       }
     }
@@ -57,7 +57,7 @@ export async function text(opts: TextPromptOptions): Promise<string> {
   const render = () => {
     clearCurrentLine(io)
     const display = buffer.length > 0 ? buffer : placeholder
-    io.writeRaw(`${Q_MARK} ${message} ${ARROW} ${display}`)
+    io.writeRaw(`${g.q} ${message} ${g.arrow} ${display}`)
     // Save cursor at end of input, drop to next line, write error or clear
     // the row, then restore the cursor. Error rows therefore never linger.
     io.writeRaw(SAVE_CURSOR)

@@ -16,16 +16,36 @@ import { colors } from '@simtabi/cli-kit-js-ansi'
 import type { IOAdapter, KeyEvent } from '@simtabi/cli-kit-js-io'
 import { PromptCancelledError } from './types'
 
-export const Q_MARK = colors.cyan('?')
-export const ARROW = colors.cyan('›')
-export const POINTER = colors.cyan('❯')
-export const CHECK = colors.green('✔')
-export const CROSS = colors.red('✖')
-export const BULLET_ON = colors.green('◉')
-export const BULLET_OFF = colors.gray('◯')
-
 export const SAVE_CURSOR = '\x1b7'
 export const RESTORE_CURSOR = '\x1b8'
+
+/**
+ * Glyph set for a prompt. Honors `io.capabilities.unicode` — terminals with
+ * stripped locales (LANG=C) get ASCII fallbacks instead of `?`-rendered
+ * mojibake.
+ */
+export interface PromptGlyphs {
+  readonly q: string
+  readonly arrow: string
+  readonly pointer: string
+  readonly check: string
+  readonly cross: string
+  readonly bulletOn: string
+  readonly bulletOff: string
+}
+
+export function glyphs(io: IOAdapter): PromptGlyphs {
+  const unicode = io.capabilities.unicode
+  return {
+    q: colors.cyan('?'),
+    arrow: colors.cyan(unicode ? '›' : '>'),
+    pointer: colors.cyan(unicode ? '❯' : '>'),
+    check: colors.green(unicode ? '✔' : 'OK'),
+    cross: colors.red(unicode ? '✖' : 'X'),
+    bulletOn: colors.green(unicode ? '◉' : '[x]'),
+    bulletOff: colors.gray(unicode ? '◯' : '[ ]'),
+  }
+}
 
 export function clearCurrentLine(io: IOAdapter): void {
   io.writeRaw('\r\x1b[K')
