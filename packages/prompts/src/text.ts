@@ -5,7 +5,8 @@
  *
  * Enter accepts (uses `default` if buffer is empty). Backspace removes the
  * last char. Ctrl+C / Escape cancel. Validation runs on Enter; failure shows
- * the error message inline and keeps the prompt open.
+ * the error message on the line below and keeps the prompt open. The error
+ * row is wiped on the next render so it never lingers.
  *
  * Non-TTY fallback: writes the message, reads one line via `io.readLine`.
  */
@@ -14,6 +15,8 @@ import { colors } from '@simtabi/cli-kit-js-ansi'
 import {
   ARROW,
   Q_MARK,
+  RESTORE_CURSOR,
+  SAVE_CURSOR,
   clearCurrentLine,
   isBackspaceKey,
   isCancelKey,
@@ -55,52 +58,53 @@ export async function text(opts: TextPromptOptions): Promise<string> {
     clearCurrentLine(io)
     const display = buffer.length > 0 ? buffer : placeholder
     io.writeRaw(`${Q_MARK} ${message} ${ARROW} ${display}`)
-    if (error) {
-      // Print the error on the next line; redraw will rewrite this line, but
-      // we need to come back up. For simplicity, error is sticky until the
-      // user types again.
-      io.writeRaw(`\n${colors.red('  ' + error)}\x1b[1A`)
-    }
+    // Save cursor at end of input, drop to next line, write error or clear
+    // the row, then restore the cursor. Error rows therefore never linger.
+    io.writeRaw(SAVE_CURSOR)
+    io.writeRaw('\n\x1b[K')
+    if (error) io.writeRaw(colors.red(`  ${error}`))
+    io.writeRaw(RESTORE_CURSOR)
   }
 
   render()
-  try {
-    // biome-ignore lint/correctness/noConstantCondition: prompt loop
-    while (true) {
-      const key = await io.readKey(sig)
-      if (isCancelKey(key)) {
-        io.writeRaw('\n')
-        throw new PromptCancelledError()
-      }
-      if (isEnterKey(key)) {
-        const value = buffer.length > 0 ? buffer : (defaultValue ?? '')
-        if (validate) {
-          const r = validate(value)
-          if (r !== true) {
-            error = r
-            render()
-            continue
-          }
-        }
-        io.writeRaw('\n')
-        return value
-      }
-      if (isBackspaceKey(key)) {
-        if (buffer.length > 0) {
-          buffer = buffer.slice(0, -1)
-          error = null
-        }
-        render()
-        continue
-      }
-      if (isPrintable(key)) {
-        buffer += key.raw
-        error = null
-        render()
-      }
+
+  // biome-ignore lint/correctness/noConstantCondition: prompt loop
+  while (true) {
+    const key = await io.readKey(sig)
+    if (isCancelKey(key)) {
+      io.writeRaw('\n')
+      throw new PromptCancelledError()
     }
-  } catch (err) {
-    if (err instanceof PromptCancelledError) throw err
-    throw err
+    if (isEnterKey(key)) {
+      const value = buffer.length > 0 ? buffer : (defaultValue ?? '')
+      if (validate) {
+        const r = validate(value)
+        if (r !== true) {
+          error = r
+          render()
+          continue
+        }
+      }
+      // Wipe the error row before leaving so the caller's next output
+      // doesn't start with our debris.
+      io.writeRaw(SAVE_CURSOR)
+      io.writeRaw('\n\x1b[K')
+      io.writeRaw(RESTORE_CURSOR)
+      io.writeRaw('\n')
+      return value
+    }
+    if (isBackspaceKey(key)) {
+      if (buffer.length > 0) {
+        buffer = buffer.slice(0, -1)
+        error = null
+      }
+      render()
+      continue
+    }
+    if (isPrintable(key)) {
+      buffer += key.raw
+      error = null
+      render()
+    }
   }
 }

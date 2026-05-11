@@ -12,6 +12,8 @@ import { colors } from '@simtabi/cli-kit-js-ansi'
 import {
   ARROW,
   Q_MARK,
+  RESTORE_CURSOR,
+  SAVE_CURSOR,
   clearCurrentLine,
   isBackspaceKey,
   isCancelKey,
@@ -39,7 +41,11 @@ export async function password(opts: PasswordPromptOptions): Promise<string> {
   const render = () => {
     clearCurrentLine(io)
     io.writeRaw(`${Q_MARK} ${message} ${ARROW} ${mask.repeat(buffer.length)}`)
-    if (error) io.writeRaw(`\n${colors.red('  ' + error)}\x1b[1A`)
+    // Save cursor, drop to next line, write/clear error row, restore.
+    io.writeRaw(SAVE_CURSOR)
+    io.writeRaw('\n\x1b[K')
+    if (error) io.writeRaw(colors.red(`  ${error}`))
+    io.writeRaw(RESTORE_CURSOR)
   }
 
   render()
@@ -59,6 +65,10 @@ export async function password(opts: PasswordPromptOptions): Promise<string> {
           continue
         }
       }
+      // Wipe the error row before leaving.
+      io.writeRaw(SAVE_CURSOR)
+      io.writeRaw('\n\x1b[K')
+      io.writeRaw(RESTORE_CURSOR)
       io.writeRaw('\n')
       return buffer
     }
