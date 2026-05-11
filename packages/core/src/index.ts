@@ -12,6 +12,14 @@ export { renderHelp, type HelpFormat, type RenderHelpOptions } from './help'
 export { suggest } from './suggest'
 export { HookBus } from './hooks'
 export { isLazyCommand, resolveSubCommand } from './lazy'
+export {
+  DEFAULT_REDACT_KEYS,
+  createLogger,
+  redactFields,
+  type CreateLoggerOptions,
+  type LogLevel,
+  type Logger,
+} from './logger'
 
 export type {
   ArgsRecord,

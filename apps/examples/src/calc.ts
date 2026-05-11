@@ -33,13 +33,13 @@ function makeBinaryCommand(name: string, description: string, { symbol, fn }: Bi
     run({ args, io }) {
       const a = Number(args.a)
       const b = Number(args.b)
+      // Throw with a user-facing message — the runner's on:error path
+      // emits the message to stderr. No need to pre-print.
       if (!Number.isFinite(a) || !Number.isFinite(b)) {
-        io.writeError(`${colors.red('error:')} both operands must be numbers\n`)
-        throw new Error('invalid input')
+        throw new Error('both operands must be numbers')
       }
       if (name === 'div' && b === 0) {
-        io.writeError(`${colors.red('error:')} division by zero\n`)
-        throw new Error('div by zero')
+        throw new Error('division by zero')
       }
       const result = fn(a, b)
       if (args.verbose) {

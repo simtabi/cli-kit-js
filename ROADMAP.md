@@ -72,7 +72,7 @@ Once 0.1.0 ships, the kit is usable but not yet "best-of-class for v1.0". These 
 
 - ✅ **2.4** **Comparison page** at `docs/src/content/docs/concepts/comparison.mdx`. Honest 18-capability matrix of cli-kit-js vs citty / commander / yargs / clack. Includes "where each tool is better" and "where cli-kit-js is worse" sections.
 
-- ⏳ **2.5** **Logger improvements.** Currently `core` ships a thin logger. Promote it: structured fields, leveled output (silent/error/warn/info/debug/trace), secret-key auto-redaction by pattern match (`password|token|secret|key|authorization`), per-stream output (console vs file via consumer-supplied sink).
+- ✅ **2.5** **Leveled logger** (`@simtabi/cli-kit-js-core` → `createLogger`). silent / error / warn / info / debug / trace levels; structured fields (`log.info('msg', { userId: 42 })`); automatic redaction of `password|token|secret|key|apikey|authorization|auth|credential|private_key` (case-insensitive, recursive into nested objects); child loggers with bound fields; pretty (color-tagged) + NDJSON formats. Errors route to stderr; non-errors to stdout. 16 tests.
 
 - ✅ **2.6** **Hyperlink rendering (OSC 8).** `render.link(text, url)` exported from `@simtabi/cli-kit-js-render`. URL scheme allowlist (`http` / `https` / `mailto`); any other scheme falls back to plain `text (url)`. 14 tests + a fast-check invariant proving no OSC 8 link is ever emitted for a disallowed scheme.
 
