@@ -1,0 +1,68 @@
+---
+title: prompts
+description: Interactive text, password, confirm, select, multiselect.
+sidebar:
+  order: 8
+---
+
+`@simtabi/cli-kit-js-prompts` builds on `io.readKey`'s raw-mode primitive. Every prompt:
+
+- takes an `IOAdapter` + optional `AbortSignal`,
+- falls back to `io.readLine` on non-TTY (piped input, scripts),
+- throws `PromptCancelledError` on Ctrl+C / Escape / abort.
+
+## Prompts
+
+```ts
+import { text, password, confirm, select, multiselect } from '@simtabi/cli-kit-js-prompts'
+import { createNodeStdio } from '@simtabi/cli-kit-js-io/node'
+
+const io = createNodeStdio()
+
+const name = await text({
+  io,
+  message: 'Your name?',
+  default: 'World',
+  validate: (v) => (v.length < 2 ? 'too short' : true),
+})
+
+const pw = await password({ io, message: 'Password?', mask: '•' })
+
+const ok = await confirm({ io, message: 'Continue?', default: true })
+
+const env = await select({
+  io,
+  message: 'Environment?',
+  options: [
+    { value: 'dev',  label: 'Development' },
+    { value: 'prod', label: 'Production', description: 'careful!' },
+  ],
+})
+
+const features = await multiselect({
+  io,
+  message: 'Pick features:',
+  options: [
+    { value: 'auth', label: 'Auth' },
+    { value: 'cache', label: 'Cache' },
+    { value: 'queue', label: 'Queue' },
+  ],
+  minSelected: 1,
+})
+```
+
+## Keys
+
+| Prompt        | Keys                                                       |
+| ------------- | ---------------------------------------------------------- |
+| `text`        | typing · Backspace · Enter · Ctrl+C / Esc cancel           |
+| `password`    | same; rendered as `*` (or custom mask)                     |
+| `confirm`     | `y` / `n` / Enter                                          |
+| `select`      | ↑/↓ · Home/End · Enter · j/k                               |
+| `multiselect` | ↑/↓ · Space toggle · Ctrl+A select-all · Enter confirm     |
+
+## Security
+
+Password buffers stay in closure — they never reach `io.write` / `io.writeRaw`. The visible mask is the only thing on the wire. Verified by test: `password.test.ts` asserts the real buffer never appears in `io.rawWrites`.
+
+Validation errors use DECSC/DECRC to render on the line below without leaving stale text on redraw.

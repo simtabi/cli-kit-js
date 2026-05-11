@@ -1,0 +1,46 @@
+---
+title: Security posture
+description: What "audit-defensible" means for cli-kit-js.
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components'
+
+`cli-kit-js` is built to enterprise-grade, audit-defensible standards. The full threat model lives at [`THREAT-MODEL.md`](https://github.com/simtabi/cli-kit-js/blob/main/THREAT-MODEL.md) in the repo. This page summarises the posture.
+
+## What we defend against
+
+- **Untrusted argv / env / config** — adversary T1. Defence: prototype-pollution-safe parsing, key allowlist, DoS caps. Fuzz-tested.
+- **Untrusted strings rendered to DOM** — adversary T2. Defence: HTML escape every char, `style` attribute restricted to a 5-property allowlist, never `innerHTML` / `eval` / inline event handlers / `javascript:`. CSP-strict by default.
+- **Untrusted strings rendered to TTY** — adversary T3. Defence: allowlist sanitiser strips OSC clipboard-hijack, DCS, APC, PM, SOS, CSI cursor/scroll/erase. Keeps only SGR.
+- **Malicious transitive deps** — adversary T4. Defence: **zero external runtime deps**, CI-enforced.
+- **Malicious contributor or typosquatter** — adversary T5. Defence: `CODEOWNERS`, signed commits required on `main`, security-review group on sensitive paths.
+- **Network attacker tampering installs** — adversary T6. Defence: npm `--provenance` via GitHub Actions OIDC, frozen lockfile, SHA-pinned Actions.
+- **Untrusted JSON config (prototype pollution)** — adversary T7. Defence: custom `safeParse()` rejects `__proto__`/`prototype`/`constructor` at any depth, null-prototype throughout, per-file + aggregate size caps, path-sandboxed loader.
+- **Prompt-time keystroke injection** — adversary T8. Defence: password buffer held in closure, never reaches `io.write` / `io.writeRaw`. Verified by test.
+
+## What we do NOT defend against
+
+- The terminal emulator's own bugs.
+- Side channels (timing, EM, acoustic) — not a crypto library.
+- Adversarial hardware.
+- Browser-engine bugs themselves.
+
+## Supply chain
+
+<Aside type="note">
+Every published package has an empty `dependencies` field for external deps. The only runtime deps allowed are workspace siblings (`@simtabi/cli-kit-js-*`). CI fails any PR that breaks this.
+</Aside>
+
+- npm publication uses `--provenance` (OIDC, GitHub Actions).
+- All GitHub Actions pinned to commit SHAs (Semgrep image is the one outstanding exception, tracked in the [release checklist](https://github.com/simtabi/cli-kit-js/blob/main/SECURITY-CHECKLIST.md)).
+- Lockfile committed, `--frozen-lockfile` in CI.
+- CodeQL + Semgrep + `pnpm audit` + OSSF Scorecard all on every PR and weekly schedules.
+- CycloneDX SBOM produced on every release, attached to the GitHub Release.
+
+## Disclosure
+
+Email **security@simtabi.com**. **Do not open a public issue.** 90-day embargo by default.
+
+The full disclosure flow is in [`SECURITY.md`](https://github.com/simtabi/cli-kit-js/blob/main/SECURITY.md).

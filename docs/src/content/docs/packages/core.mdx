@@ -1,0 +1,78 @@
+---
+title: core
+description: defineCommand, fluent cli() builder, async runner, hooks, help generator.
+sidebar:
+  order: 7
+---
+
+`@simtabi/cli-kit-js-core` is the runtime heart of the kit.
+
+## Two surfaces
+
+```ts
+// Declarative
+import { defineCommand } from '@simtabi/cli-kit-js-core'
+
+const cmd = defineCommand({
+  meta: { name: 'build', version: '1.0.0' },
+  args: { input: { type: 'positional', required: true } },
+  run: ({ args, io }) => io.write(`building ${args.input}\n`),
+})
+
+// Fluent
+import { cli } from '@simtabi/cli-kit-js-core'
+
+const cmd2 = cli('build')
+  .version('1.0.0')
+  .positional('input', { required: true })
+  .action(({ args, io }) => io.write(`building ${args.input}\n`))
+  .build()
+```
+
+Both freeze the resulting `Command` and validate at definition time (parent commands with `subCommands` can't also declare positionals; rest positional must be last).
+
+## The runner
+
+```ts
+import { run } from '@simtabi/cli-kit-js-core'
+
+const result = await run(cmd)
+// RunResult = { type: 'ok', code: 0, result } | { type: 'help', code: 0 }
+//           | { type: 'version', code: 0 } | { type: 'usage-error', code: 2, errors }
+//           | { type: 'runtime-error', code: 1, error } | { type: 'cancelled', code: 130|143|129 }
+```
+
+Lifecycle:
+
+1. Resolve `IOAdapter` (default: `createNodeStdio`).
+2. Install `SignalController` + `TerminalGuard` unless overridden.
+3. Route subcommands (lazy-loaded if needed).
+4. Intercept `--help` (`--help=json|markdown|man`) and `--version`.
+5. Parse args.
+6. `before:run` hook → `setup` → `run` → `cleanup` → `after:run` hook.
+7. Fire `on:exit` and return.
+
+Cleanup always runs. `AbortSignal` threads through. `cancelled` results map to UNIX exit codes.
+
+## Plugins
+
+```ts
+import type { Plugin } from '@simtabi/cli-kit-js-core'
+
+const timer: Plugin = {
+  name: 'timer',
+  hooks: {
+    'before:run': ({ ctx }) => ctx.io.write(`(start)\n`),
+    'after:run':  ({ ctx }) => ctx.io.write(`(done)\n`),
+    'on:error':   ({ error }) => console.error(error),
+  },
+}
+
+defineCommand({ ..., plugins: [timer] })
+```
+
+Plugin throws are isolated — logged to stderr, run continues. Pass `strictPlugins: true` to `run()` to make plugin failures abort.
+
+## Help output
+
+`--help` (TTY), `--help=json`, `--help=markdown`, `--help=man` all supported. The runner adds help/version flags only if the consumer hasn't defined them.

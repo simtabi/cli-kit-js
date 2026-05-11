@@ -1,0 +1,18 @@
+/* Custom theme tokens — keep the docs visually aligned with terminal output. */
+
+:root {
+  --sl-color-accent-low: #0e2d4a;
+  --sl-color-accent: #58a6ff;
+  --sl-color-accent-high: #b3d4ff;
+}
+
+/* Inline code: subtle background, readable in both light and dark themes. */
+:not(pre) > code {
+  font-variant-ligatures: none;
+}
+
+/* Slightly tighter sidebar so the package list fits without truncation. */
+.sidebar-pane summary,
+.sidebar-pane a {
+  letter-spacing: -0.005em;
+}

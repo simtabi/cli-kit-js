@@ -1,0 +1,57 @@
+---
+title: io
+description: IOAdapter abstraction + Node, DOM, console, in-memory implementations.
+sidebar:
+  order: 4
+---
+
+`@simtabi/cli-kit-js-io` is the single I/O chokepoint for the whole kit. Everything that writes, prompts, or detects capabilities goes through `IOAdapter`.
+
+## The interface
+
+```ts
+interface IOAdapter {
+  write(chunk: string): void          // sanitises ANSI to SGR-only
+  writeError(chunk: string): void
+  writeRaw(chunk: string): void       // bypasses sanitisation
+  clear(): void
+  readKey(signal: AbortSignal): Promise<KeyEvent>
+  readLine(signal: AbortSignal): Promise<string>
+  readonly columns: number
+  readonly rows: number
+  readonly isTTY: boolean
+  readonly isPiped: boolean
+  readonly capabilities: { color, unicode, hyperlinks, stream }
+  readonly stdin: ReadableStream<Uint8Array>
+  onResize(listener: () => void): () => void
+}
+```
+
+## Four implementations
+
+| Subpath              | Where             | Notes                                                          |
+| -------------------- | ----------------- | -------------------------------------------------------------- |
+| `/node`              | Node 22+          | stdio, raw-mode keypress, readline, signal-aware terminal restore. |
+| `/dom`               | Browser DOM       | HTML-escaped by default, CSP-strict, nonce-capable.            |
+| `/console`           | Browser DevTools  | ANSI SGR → `%c` CSS format strings.                            |
+| `/memory`            | Any               | In-process buffer for tests.                                   |
+
+```ts
+import { createNodeStdio } from '@simtabi/cli-kit-js-io/node'
+import { createDomAdapter } from '@simtabi/cli-kit-js-io/dom'
+import { createConsoleAdapter } from '@simtabi/cli-kit-js-io/console'
+import { MemoryAdapter } from '@simtabi/cli-kit-js-io/memory'
+
+const node    = createNodeStdio()
+const dom     = createDomAdapter({ mount: '#terminal' })
+const devtool = createConsoleAdapter()
+const test    = new MemoryAdapter({ isTTY: true })
+```
+
+## Signals + terminal restore
+
+```ts
+import { SignalController, TerminalGuard } from '@simtabi/cli-kit-js-io'
+```
+
+Used internally by [`core`'s `run()`](/packages/core/). Maps SIGINT/SIGTERM/SIGHUP to one `AbortSignal` with a 5 s cooperative shutdown window; SIGPIPE → graceful `exit(0)`. `TerminalGuard` restores cursor / cooked-mode / SGR on every exit path including uncaught exceptions.

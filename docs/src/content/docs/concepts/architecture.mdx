@@ -1,0 +1,67 @@
+---
+title: Architecture
+description: How the nine packages fit together.
+sidebar:
+  order: 1
+---
+
+`cli-kit-js` is a monorepo of nine npm packages. Eight are runtime; one (`testing`) ships separately for use during development. The dependency graph is a DAG — no cycles — and tree-shakes cleanly because every package sets `"sideEffects": false`.
+
+## Package dependency graph
+
+```
+types of:
+  parser, ansi, text, config       (leaves — no internal deps)
+
+ansi
+ ├─ text
+ ├─ io
+ ├─ render/html
+ └─ prompts
+
+text
+ ├─ render
+ └─ prompts
+
+io
+ ├─ render
+ ├─ prompts
+ ├─ core
+ └─ testing (peer dep)
+
+config
+ └─ core
+
+render        ← ansi, text, io
+core          ← parser, ansi, text, io, config
+prompts       ← ansi, io, text
+testing       ← (peer) core, io
+cli-kit-js    ← (meta) all 8 publishable packages
+```
+
+All workspace deps. No external runtime dependencies on any package. CI enforces this via the `no-external-runtime-deps` job: any PR introducing a non-`@simtabi/cli-kit-js-*` runtime dep fails the build.
+
+## Where each package lives
+
+| Package                            | Responsibility                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------ |
+| `cli-kit-js-parser`                | argv → typed values. mri-class API with the legacy bugs fixed.                 |
+| `cli-kit-js-ansi`                  | SGR colours, allowlist sanitiser, capability detection.                        |
+| `cli-kit-js-text`                  | Width-safe truncate / wrap / pad / align with inlined Unicode width table.     |
+| `cli-kit-js-io`                    | `IOAdapter` interface + Node, DOM, console, in-memory implementations.         |
+| `cli-kit-js-config`                | Layered config from `./config/*.{env}.json` + env + CLI + runtime.             |
+| `cli-kit-js-render`                | `box`, `table`, `list`, `tree`, `banner`, `progressBar`, `spinner`, ANSI→HTML. |
+| `cli-kit-js-core`                  | `defineCommand`, fluent `cli()`, async runner, hooks, help generator.          |
+| `cli-kit-js-prompts`               | `text`, `password`, `confirm`, `select`, `multiselect`.                        |
+| `cli-kit-js-testing`               | Matchers, `MemoryAdapter`, prompt-key scripting, snapshot helpers.             |
+| `cli-kit-js` (meta)                | Re-exports the above through subpath exports.                                  |
+
+## Two surfaces, same config
+
+`defineCommand({…})` and `cli('name').…build()` both produce the same immutable `Command` object. The runner doesn't care which one built it.
+
+## One I/O chokepoint
+
+Everything the kit writes goes through `IOAdapter.write` / `writeError` / `writeRaw`. There is no direct `process.stdout.write` or `document.body.appendChild` call anywhere else in the codebase. This makes adapter swapping trivial — tests use `MemoryAdapter`, browsers use `createDomAdapter`, dev tools use `createConsoleAdapter`, production uses `createNodeStdio`.
+
+See the [Build a CLI](/guides/build-a-cli/) guide for an end-to-end walkthrough.

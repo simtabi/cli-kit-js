@@ -1,0 +1,49 @@
+---
+title: parser
+description: argv → typed values. mri-class API with documented bug fixes.
+sidebar:
+  order: 1
+---
+
+`@simtabi/cli-kit-js-parser` turns `process.argv.slice(2)` (or any string array) into a typed result object.
+
+## Features
+
+- Long, short, clustered, and `=`-separated flags (`--name=foo`, `-n foo`, `-vvv`, `-n5`, `-n=5`).
+- Boolean coercion symmetric for `true/1/yes/y/on` and `false/0/no/n/off`.
+- `--no-<flag>` negation for any type (booleans → `false`, counts → `0`, arrays → `[]`).
+- Counted flags (`type: 'count'`) and array options (`-I a -I b`).
+- Positional + rest positionals (`...files`).
+- Alias canonicalization in the documented direction (`alias: { name: ['n'] }` puts the value on `.name`, not `.n`).
+- Negative numbers accepted as values (`--count -5`).
+- `--` separator halts further flag parsing.
+- Strict mode rejects unknown flags by default; opt-out per command.
+- Env-var fallback per option (`env: 'PORT'`).
+- Enum validation via `values: ['a', 'b']`.
+
+## Security
+
+- Result objects via `Object.create(null)`.
+- Forbidden keys (`__proto__`/`prototype`/`constructor`) rejected.
+- Property names validated against `/^[A-Za-z_][A-Za-z0-9_-]*$/`.
+- Hard caps: 10 000 argv tokens, 1 MiB total input.
+- Fuzz-tested with `fast-check`.
+
+## API
+
+```ts
+import { parse } from '@simtabi/cli-kit-js-parser'
+
+const outcome = parse(['-vvv', '--name', 'World'], {
+  args: {
+    name:    { type: 'string', alias: 'n' },
+    verbose: { type: 'count', alias: 'v' },
+  },
+})
+
+if (outcome.ok) {
+  outcome.result.values // { name: 'World', verbose: 3 }
+}
+```
+
+Returns a `ParseOutcome` discriminated union — never throws on user input.

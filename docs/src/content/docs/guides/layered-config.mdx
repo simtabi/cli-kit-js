@@ -1,0 +1,101 @@
+---
+title: Layered config
+description: Resolve config from ./config files, env vars, CLI, and runtime overrides.
+sidebar:
+  order: 2
+---
+
+Most CLIs want config to come from several places. `cli-kit-js-config` resolves a single typed object from up to eight layers.
+
+## File layout
+
+```
+config/
+├─ default.json
+├─ development.json
+├─ production.json
+├─ test.json
+├─ development.local.json   ← gitignored
+├─ local.json               ← gitignored
+└─ schema.json              ← optional, for editor autocomplete
+```
+
+The `*.local.json` files are gitignored by the kit's default `.gitignore`. Copy from `.example.json` files in real projects.
+
+## Schema-driven
+
+```ts
+import { defineSchema, createConfig } from '@simtabi/cli-kit-js/config'
+
+const schema = defineSchema({
+  server: {
+    port: { type: 'integer', default: 3000, min: 1, max: 65535, env: 'PORT', cli: '--port' },
+    host: { type: 'string', default: '0.0.0.0', env: 'HOST' },
+  },
+  output: {
+    color:  { type: 'enum', values: ['auto', 'always', 'never'], default: 'auto', env: 'NO_COLOR' },
+    format: { type: 'enum', values: ['text', 'json'], default: 'text', cli: '--format' },
+  },
+  paths: {
+    cache: { type: 'path', default: '~/.cache/myapp', env: 'CACHE_DIR', expandUser: true },
+  },
+  secrets: {
+    apiKey: { type: 'string', sensitive: true, env: 'API_KEY' },
+  },
+})
+
+const config = await createConfig({
+  schema,
+  configDir: './config',
+  environment: process.env.NODE_ENV ?? 'development',
+  envPrefix: 'MYAPP_',          // auto-bind MYAPP_SERVER_PORT → server.port
+  cli: parsedArgs,              // from cli-kit-js-parser
+  strict: true,                 // unknown keys in files are errors
+})
+```
+
+## Read, mutate, observe
+
+```ts
+config.get('server.port')                       // typed: number
+config.set('output.color', 'never')             // validates → runtime layer
+config.assign({ server: { port: 9090 } })       // patch (deep)
+config.reset('server.port')                     // revert to file-loaded value
+config.resetAll()                                // revert all runtime overrides
+
+config.source('server.port')                    // { layer: 'env', value: 8080 }
+config.snapshot({ redactSensitive: true })      // deep-frozen, secrets → [REDACTED]
+
+const unsub = config.on('change', (path, prev, next) => { … })
+const unsub2 = config.onPath('server.port', (prev, next) => { … })
+```
+
+## Wiring into a command
+
+```ts
+import { defineCommand, run } from '@simtabi/cli-kit-js'
+import { createConfig, defineSchema } from '@simtabi/cli-kit-js/config'
+
+const schema = defineSchema({ /* … */ })
+
+const main = defineCommand({
+  meta: { name: 'app' },
+  async setup({ args }) {
+    const config = await createConfig({ schema, configDir: './config', cli: args })
+    // stash on a module-level singleton, request-scoped store, etc.
+  },
+  run({ io }) { /* … */ },
+})
+
+await run(main)
+```
+
+## Validation failures
+
+`config.validationErrors` is populated even when `createConfig` succeeds — so you can decide whether to abort or warn:
+
+```ts
+if (config.validationErrors.length > 0) {
+  for (const e of config.validationErrors) console.warn(`[config] ${e.path}: ${e.message}`)
+}
+```

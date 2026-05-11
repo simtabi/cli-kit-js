@@ -1,0 +1,70 @@
+---
+title: cli-kit-js
+description: A safe, fluent, zero-runtime-dependency CLI and rendering toolkit for Node, Deno, Bun, and the browser.
+template: splash
+hero:
+  tagline: Build CLIs once. Render them anywhere — terminal, browser DOM, DevTools console.
+  actions:
+    - text: Get started
+      link: /getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: GitHub
+      link: https://github.com/simtabi/cli-kit-js
+      icon: external
+      variant: secondary
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components'
+
+`cli-kit-js` is the JavaScript implementation of the **cli-kit** family — a multi-language CLI brand. The Python, Go, and Rust siblings share the same design: zero runtime dependencies, safe-by-default rendering, layered config, fluent command builder.
+
+<CardGrid>
+  <Card title="Universal" icon="laptop">
+    Works in Node 22+, Deno, Bun, and the browser. One adapter interface, four implementations.
+  </Card>
+  <Card title="Safe by default" icon="approve-check">
+    XSS-safe HTML rendering, allowlist ANSI sanitisation, prototype-pollution-safe config parsing. Audit-defensible.
+  </Card>
+  <Card title="Zero runtime deps" icon="seti:npm">
+    Every published package has an empty `dependencies` field (workspace siblings only). CI-enforced.
+  </Card>
+  <Card title="Fluent + functional" icon="puzzle">
+    Both `defineCommand({…})` and `cli('build').option(…).action(…)` produce the same immutable config.
+  </Card>
+  <Card title="Tree-shakeable" icon="rocket">
+    Each subsystem is its own package. Subpath exports skip the meta package entirely.
+  </Card>
+  <Card title="Tested" icon="seti:notebook">
+    ~400 tests, property-based fuzz across every security-critical surface, per-package size budgets.
+  </Card>
+</CardGrid>
+
+## Quick taste
+
+```ts
+import { defineCommand, run } from '@simtabi/cli-kit-js'
+
+const build = defineCommand({
+  meta: { name: 'build', version: '1.0.0' },
+  args: {
+    input:   { type: 'positional', required: true },
+    output:  { type: 'string', alias: 'o', default: 'dist/' },
+    verbose: { type: 'count', alias: 'v' },
+  },
+  async run({ args, io, signal }) {
+    io.write(`Building ${args.input} → ${args.output}\n`)
+  },
+})
+
+await run(build)
+```
+
+## The cli-kit family
+
+| Repo                   | Status     | Install                                          |
+| ---------------------- | ---------- | ------------------------------------------------ |
+| `simtabi/cli-kit-js`   | active     | `npm i @simtabi/cli-kit-js`                      |
+| `simtabi/cli-kit-py`   | planned    | `pip install simtabi-cli-kit-py`                 |
+| `simtabi/cli-kit-go`   | planned    | `go get github.com/simtabi/cli-kit-go`           |
+| `simtabi/cli-kit-rs`   | planned    | `cargo add simtabi-cli-kit-rs`                   |

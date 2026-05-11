@@ -1,0 +1,73 @@
+---
+title: render
+description: Pretty output — box, table, list, tree, banner, progress, spinner, ANSI→HTML.
+sidebar:
+  order: 5
+---
+
+`@simtabi/cli-kit-js-render` provides width-safe renderers. Pure functions return strings; one stateful spinner controller writes through an `IOAdapter`.
+
+## Pure renderers
+
+```ts
+import { box, table, list, tree, banner, progressBar } from '@simtabi/cli-kit-js-render'
+
+console.log(box('Hello!', { style: 'round', padding: { x: 2, y: 1 }, title: 'Greeting' }))
+
+console.log(table(
+  [['Alice', '30'], ['Bob', '25']],
+  { headers: ['Name', 'Age'], align: ['left', 'right'] },
+))
+
+console.log(list([
+  'top',
+  { text: 'parent', children: ['child1', 'child2'] },
+]))
+
+console.log(tree({
+  label: 'src',
+  children: [
+    { label: 'index.ts' },
+    { label: 'lib', children: [{ label: 'util.ts' }] },
+  ],
+}))
+
+console.log(banner('cli-kit-js'))
+
+console.log(progressBar(50, 100, { width: 30, label: 'Loading' }))
+```
+
+Five box styles: `single`, `double`, `round`, `bold`, `ascii`. Tree falls back to ASCII (`+--`, `|`, `\`--') via `{ ascii: true }`.
+
+## Spinner
+
+```ts
+import { createSpinner } from '@simtabi/cli-kit-js-render'
+
+const sp = createSpinner(io, { text: 'Building…', style: 'dots' })
+sp.start()
+try {
+  await build()
+  sp.succeed('Built!')
+} catch (e) {
+  sp.fail((e as Error).message)
+}
+```
+
+Auto-disables animation on non-TTY (so logs stay readable) and emits one-shot status lines on transitions instead. Timer is `unref`'d so it never keeps the event loop alive.
+
+## ANSI → HTML
+
+`@simtabi/cli-kit-js-render/html` exports the converter:
+
+```ts
+import { ansiToHtml } from '@simtabi/cli-kit-js-render/html'
+
+ansiToHtml('\x1b[31mred\x1b[39m')
+// '<span style="color: red">red</span>'
+
+ansiToHtml('<script>alert(1)</script>')
+// '&lt;script&gt;alert(1)&lt;&#x2F;script&gt;'  — every char HTML-escaped
+```
+
+XSS-safe by default. 5-property style allowlist. Fuzz-tested with four invariants (no `<script`, no `javascript:`, no `on*=`, no unescaped raw `<`).

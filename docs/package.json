@@ -6,11 +6,19 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "echo 'Starlight bootstrap lands in M9'",
-    "build": "echo 'Starlight bootstrap lands in M9'",
-    "preview": "echo 'Starlight bootstrap lands in M9'",
-    "typecheck": "echo 'no types yet'",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check",
     "test": "echo 'no tests yet'",
-    "clean": "rm -rf dist .astro"
+    "clean": "rm -rf dist .astro .turbo"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.0",
+    "@astrojs/starlight": "^0.30.0",
+    "astro": "^5.0.0"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
   }
 }

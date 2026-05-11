@@ -1,0 +1,65 @@
+---
+title: config
+description: Layered, schema-validated configuration from ./config/*.{env}.json + env + CLI + runtime.
+sidebar:
+  order: 6
+---
+
+import { Aside } from '@astrojs/starlight/components'
+
+`@simtabi/cli-kit-js-config` resolves a typed configuration from up to eight ordered layers.
+
+## Precedence (low → high)
+
+| # | Source                                  |
+| - | --------------------------------------- |
+| 1 | Schema defaults                         |
+| 2 | `config/default.json`                   |
+| 3 | `config/{env}.json`                     |
+| 4 | `config/{env}.local.json` (gitignored)  |
+| 5 | `config/local.json` (gitignored)        |
+| 6 | `process.env` (per-field or auto-prefix)|
+| 7 | Parsed CLI args                         |
+| 8 | `.set()` runtime overrides              |
+
+## Define a schema
+
+```ts
+import { defineSchema, createConfig } from '@simtabi/cli-kit-js-config'
+
+const schema = defineSchema({
+  server: {
+    port: { type: 'integer', default: 3000, min: 1, max: 65535, env: 'PORT', cli: '--port' },
+    host: { type: 'string', default: 'localhost' },
+  },
+  output: {
+    color: { type: 'enum', values: ['auto', 'always', 'never'], default: 'auto' },
+  },
+  secrets: {
+    apiKey: { type: 'string', sensitive: true, env: 'API_KEY' },
+  },
+})
+
+const config = await createConfig({
+  schema,
+  configDir: './config',
+  environment: process.env.NODE_ENV ?? 'development',
+  envPrefix: 'MYAPP_',
+})
+
+config.get('server.port')        // typed: number
+config.set('output.color', 'never')
+config.snapshot({ redactSensitive: true })
+config.source('server.port')     // { layer: 'env', value: 8080 }
+config.on('change', (path, prev, next) => { … })
+```
+
+## Security
+
+<Aside type="caution">
+JSON-only by default. Custom `safeParse()` rejects `__proto__` / `prototype` / `constructor` keys at any depth. Output uses `Object.create(null)`. Files are size-capped (1 MiB per file, 4 MiB aggregate). The loader sandbox uses `realpath` to reject symlink escapes from `configDir`.
+</Aside>
+
+Schema flags `sensitive: true` and `secret: true` redact values in `snapshot({ redactSensitive: true })` and logger output. URL fields reject `javascript:`/`data:`/`vbscript:` schemes.
+
+`freezeAfterLoad: true` blocks all mutation post-init — useful for security-sensitive deployments where the runtime should not change config dynamically.

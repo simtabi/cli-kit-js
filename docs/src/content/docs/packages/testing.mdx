@@ -1,0 +1,76 @@
+---
+title: testing
+description: MemoryAdapter, matchers, prompt-key scripting, snapshot helpers.
+sidebar:
+  order: 9
+---
+
+`@simtabi/cli-kit-js-testing` is the test harness. Vitest-agnostic — matchers throw descriptive `Error` so any runner that fails on uncaught throws works (Vitest, Node `test`, Mocha, Jest).
+
+```ts
+import {
+  MemoryAdapter,
+  answer,
+  expectStdout,
+  expectExitCode,
+  snapshotHelp,
+  freezeTime,
+  withEnv,
+} from '@simtabi/cli-kit-js-testing'
+
+import { defineCommand, run } from '@simtabi/cli-kit-js-core'
+
+const cmd = defineCommand({
+  meta: { name: 'hello' },
+  args: { name: { type: 'string', default: 'World' } },
+  run: ({ args, io }) => io.write(`Hello, ${args.name}!\n`),
+})
+
+const io = new MemoryAdapter()
+const result = await run(cmd, {
+  io,
+  argv: ['--name', 'Claude'],
+  exit: false,
+  installSignalsAndGuard: false,
+})
+
+expectStdout(io, 'Hello, Claude!')
+expectExitCode(result, 0)
+```
+
+## Scripted prompts
+
+```ts
+const io = new MemoryAdapter({ isTTY: true })
+answer(io, 'h', 'i', 'enter')            // queue keystrokes
+answer(io, { name: 'c', ctrl: true })    // with modifiers
+answer.line(io, 'piped value')           // queue a readLine response
+
+await text({ io, message: 'Name?' }) // resolves to 'hi'
+```
+
+## Time + env
+
+```ts
+const guard = freezeTime('2026-01-01T00:00:00Z')
+try {
+  // Date.now() pinned during scope
+} finally {
+  guard.restore()
+}
+
+await withEnv({ NO_COLOR: '1' }, async () => {
+  // process.env.NO_COLOR === '1' inside; restored on return or throw
+})
+```
+
+## Snapshot helpers
+
+```ts
+import { snapshotHelp } from '@simtabi/cli-kit-js-testing'
+
+expect(snapshotHelp(cmd)).toMatchSnapshot()
+expect(snapshotHelp(cmd, 'json')).toMatchSnapshot()
+```
+
+`snapshotHelp` renders the help text with `colorDepth: 0` and strips any residual ANSI so snapshots stay stable.

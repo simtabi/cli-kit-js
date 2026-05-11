@@ -1,0 +1,24 @@
+---
+title: Naming conventions
+description: Why GitHub repos use a prefix and npm packages use a suffix.
+sidebar:
+  order: 3
+---
+
+`cli-kit-js` is one implementation in the **cli-kit** multi-language family. A single naming pattern applies everywhere:
+
+```
+cli-kit-{language}[-{component}]
+```
+
+| Surface              | Pattern                          | Example                              |
+| -------------------- | -------------------------------- | ------------------------------------ |
+| GitHub repo          | `cli-kit-{lang}`                 | `simtabi/cli-kit-js`                 |
+| npm meta package     | `@simtabi/cli-kit-{lang}`        | `@simtabi/cli-kit-js`                |
+| npm subpackage       | `@simtabi/cli-kit-{lang}-{name}` | `@simtabi/cli-kit-js-parser`         |
+| Future PyPI          | `simtabi-cli-kit-{lang}[-{name}]`| `simtabi-cli-kit-py`                 |
+| Source identifiers   | unmarked                         | `class Command`, `interface IOAdapter` |
+
+The package boundary carries the language signal; class, interface, and function names inside the code do not. A future `cli-kit-py` can use the same `Command` / `IOAdapter` names in Python idiom without collision.
+
+This matches industry convention for multi-language SDK families (Datadog `dd-trace-js`/`dd-trace-py`/`dd-trace-go`, AWS `aws-sdk-js`, PostHog `posthog-js`/`posthog-python`/`posthog-ruby`).

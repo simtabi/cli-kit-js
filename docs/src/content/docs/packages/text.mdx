@@ -1,0 +1,35 @@
+---
+title: text
+description: Width-safe truncate, wrap, pad, align.
+sidebar:
+  order: 3
+---
+
+`@simtabi/cli-kit-js-text` provides width-aware string utilities. ANSI-aware via `ansi.strip`, Unicode-aware via `Intl.Segmenter` + an inlined width table.
+
+```ts
+import { width, truncate, wrap, pad, align } from '@simtabi/cli-kit-js-text'
+
+width('hello')                 // 5
+width('日本語')                  // 6  (each CJK char is 2 columns)
+width('\x1b[31mred\x1b[39m')   // 3  (ANSI stripped first)
+width('😀')                     // 2
+width('👨‍👩‍👧')                    // 2  (ZWJ grapheme cluster)
+
+truncate('hello world', 8)                       // 'hello w…'
+truncate('hello world', 8, { position: 'middle' }) // 'hel…rld'
+
+pad('hi', 5)              // 'hi   '
+pad('hi', 5, 'left')      // '   hi'
+pad('hi', 6, 'center')    // '  hi  '
+
+wrap('one two three four five', 10)
+// 'one two\n three four\n five'
+
+align(['a', 'bb', 'ccc'], 5)
+// ['a    ', 'bb   ', 'ccc  ']
+```
+
+## Unicode coverage
+
+Inlined width table covers CJK Unified Ideographs (and extensions B–G), Hangul, Hiragana, Katakana, fullwidth forms, and major emoji blocks (1F300–1FAFF). Combining marks, ZWJ, variation selectors, and bidi controls count as width 0.

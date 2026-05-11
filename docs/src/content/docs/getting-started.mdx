@@ -1,0 +1,130 @@
+---
+title: Getting started
+description: Install cli-kit-js and build a first command.
+---
+
+import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components'
+
+## Install
+
+<Tabs syncKey="pkg">
+  <TabItem label="pnpm">
+    ```bash
+    pnpm add @simtabi/cli-kit-js
+    ```
+  </TabItem>
+  <TabItem label="npm">
+    ```bash
+    npm install @simtabi/cli-kit-js
+    ```
+  </TabItem>
+  <TabItem label="bun">
+    ```bash
+    bun add @simtabi/cli-kit-js
+    ```
+  </TabItem>
+  <TabItem label="deno">
+    ```ts
+    import { defineCommand, run } from 'npm:@simtabi/cli-kit-js'
+    ```
+  </TabItem>
+</Tabs>
+
+**Requires Node 22 or newer.** Older Node lines are End-of-Life and unsupported.
+
+## Your first command
+
+<Steps>
+
+1. Create `hello.ts`:
+
+   ```ts
+   #!/usr/bin/env node
+   import { defineCommand, run } from '@simtabi/cli-kit-js'
+
+   const hello = defineCommand({
+     meta: { name: 'hello', version: '0.1.0' },
+     args: {
+       name: { type: 'string', alias: 'n', default: 'World', description: 'Who to greet' },
+       loud: { type: 'boolean', alias: 'l', description: 'SHOUT IT' },
+     },
+     run({ args, io }) {
+       const greeting = `Hello, ${args.name}!`
+       io.write(`${args.loud ? greeting.toUpperCase() : greeting}\n`)
+     },
+   })
+
+   await run(hello)
+   ```
+
+2. Run it:
+
+   ```bash
+   node hello.ts --help
+   node hello.ts --name Claude
+   node hello.ts -n Claude -l
+   ```
+
+</Steps>
+
+## Subcommands
+
+```ts
+import { defineCommand, run } from '@simtabi/cli-kit-js'
+
+const greet = defineCommand({
+  meta: { name: 'greet' },
+  args: { who: { type: 'positional', required: true } },
+  run: ({ args, io }) => io.write(`Hi, ${args.who}!\n`),
+})
+
+const main = defineCommand({
+  meta: { name: 'tool', version: '0.1.0' },
+  subCommands: { greet },
+})
+
+await run(main)
+```
+
+```bash
+node tool.ts greet World
+# → Hi, World!
+```
+
+Lazy subcommands work the same — pass a function:
+
+```ts
+subCommands: {
+  build: () => import('./build.js'),  // resolves only when invoked
+}
+```
+
+## Fluent OOP variant
+
+Same config, builder syntax:
+
+```ts
+import { cli, run } from '@simtabi/cli-kit-js'
+
+const build = cli('build')
+  .version('1.0.0')
+  .description('Build the project')
+  .positional('input', { required: true })
+  .option('output', 'string', { alias: 'o', default: 'dist/' })
+  .flag('verbose', { alias: 'v' })
+  .action(({ args, io }) => io.write(`${args.input} → ${args.output}\n`))
+  .build()
+
+await run(build)
+```
+
+<Aside type="tip">
+Both APIs produce the same immutable `Command` config — pick the one that fits the calling code. Tests cover both surfaces.
+</Aside>
+
+## Next steps
+
+- [Build a real CLI](/guides/build-a-cli/) — subcommands, validation, plugins.
+- [Layered config](/guides/layered-config/) — `./config/*.{env}.json` + env + CLI + runtime.
+- [Browser rendering](/guides/browser-rendering/) — render the same output into a `<div>`.
+- [Writing tests](/guides/writing-tests/) — MemoryAdapter + scripted prompts + matchers.

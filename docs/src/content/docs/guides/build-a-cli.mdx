@@ -1,0 +1,93 @@
+---
+title: Build a real CLI
+description: End-to-end walkthrough — subcommands, validation, prompts, plugins.
+sidebar:
+  order: 1
+---
+
+Build a small `deploy` CLI that exercises the full kit: subcommands, layered config, validated args, an interactive confirm, and a plugin.
+
+## 1. Set up the package
+
+```bash
+mkdir my-deploy && cd my-deploy
+pnpm init
+pnpm add @simtabi/cli-kit-js
+mkdir config
+```
+
+## 2. Define commands
+
+```ts
+// src/index.ts
+import { defineCommand, run } from '@simtabi/cli-kit-js'
+import { confirm } from '@simtabi/cli-kit-js/prompts'
+import { box } from '@simtabi/cli-kit-js/render'
+
+const status = defineCommand({
+  meta: { name: 'status', description: 'Show current deploy state' },
+  run: ({ io }) => io.write(box('Healthy', { style: 'round' }) + '\n'),
+})
+
+const push = defineCommand({
+  meta: { name: 'push', description: 'Push a new deploy' },
+  args: {
+    env:   { type: 'enum', values: ['dev', 'prod'], required: true },
+    force: { type: 'boolean', alias: 'f' },
+  },
+  async run({ args, io }) {
+    if (args.env === 'prod' && !args.force) {
+      const ok = await confirm({ io, message: 'Push to PRODUCTION?', default: false })
+      if (!ok) {
+        io.write('Aborted.\n')
+        return
+      }
+    }
+    io.write(`Pushing to ${args.env}…\n`)
+  },
+})
+
+const main = defineCommand({
+  meta: { name: 'deploy', version: '0.1.0' },
+  subCommands: { status, push },
+})
+
+await run(main)
+```
+
+## 3. Run it
+
+```bash
+node src/index.ts --help
+node src/index.ts status
+node src/index.ts push --env dev
+node src/index.ts push --env prod        # prompts for confirmation
+node src/index.ts push --env prod -f     # bypasses confirm
+```
+
+## 4. Add a plugin
+
+```ts
+const timing = {
+  name: 'timing',
+  hooks: {
+    'before:run': () => { console.time('cmd') },
+    'after:run':  () => { console.timeEnd('cmd') },
+  },
+}
+
+defineCommand({ …, plugins: [timing] })
+```
+
+Plugin failures are isolated by default — a throwing hook logs to stderr and the command continues.
+
+## 5. Lazy-load big subcommands
+
+```ts
+subCommands: {
+  status,
+  push: () => import('./commands/push.js'),  // only loaded when invoked
+}
+```
+
+The runner awaits the import and resolves both `Command` and `{ default: Command }` shapes — works with ESM star imports.

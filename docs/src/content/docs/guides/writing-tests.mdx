@@ -1,0 +1,104 @@
+---
+title: Writing tests
+description: MemoryAdapter, prompt-key scripting, snapshot helpers.
+sidebar:
+  order: 4
+---
+
+Tests against `cli-kit-js` use `MemoryAdapter` to capture output and script input. No real I/O ever reaches the test runner.
+
+## Pattern
+
+```ts
+import { describe, expect, it } from 'vitest'
+import { defineCommand, run } from '@simtabi/cli-kit-js'
+import { MemoryAdapter, expectStdout, expectExitCode } from '@simtabi/cli-kit-js/testing'
+
+const cmd = defineCommand({
+  meta: { name: 'hello' },
+  args: { name: { type: 'string', default: 'World' } },
+  run: ({ args, io }) => io.write(`Hello, ${args.name}!\n`),
+})
+
+describe('hello', () => {
+  it('greets', async () => {
+    const io = new MemoryAdapter()
+    const result = await run(cmd, {
+      io,
+      argv: ['--name', 'Claude'],
+      exit: false,                       // don't process.exit
+      installSignalsAndGuard: false,     // don't install real handlers
+    })
+    expectStdout(io, 'Hello, Claude!')
+    expectExitCode(result, 0)
+  })
+})
+```
+
+The `exit: false` + `installSignalsAndGuard: false` combo gives a pure functional runner. Tests can run in parallel without touching real signals or `process.exit`.
+
+## Scripted prompts
+
+```ts
+import { answer, MemoryAdapter } from '@simtabi/cli-kit-js/testing'
+import { text, select } from '@simtabi/cli-kit-js/prompts'
+
+it('text prompt accepts typed input', async () => {
+  const io = new MemoryAdapter({ isTTY: true, color: 24 })
+  answer(io, 'h', 'i', 'enter')
+  const result = await text({ io, message: 'name?' })
+  expect(result).toBe('hi')
+})
+
+it('select prompt arrow-navigates', async () => {
+  const io = new MemoryAdapter({ isTTY: true, color: 24 })
+  answer(io, { name: 'down' }, { name: 'down' }, 'enter')
+  const result = await select({
+    io,
+    message: 'choose',
+    options: [
+      { value: 'a', label: 'Alpha' },
+      { value: 'b', label: 'Beta' },
+      { value: 'c', label: 'Gamma' },
+    ],
+  })
+  expect(result).toBe('c')
+})
+```
+
+Non-TTY scripts use `answer.line(io, 'piped value')` which queues a `readLine` response.
+
+## Deterministic snapshots
+
+```ts
+import { snapshotHelp } from '@simtabi/cli-kit-js/testing'
+
+it('help is stable', () => {
+  expect(snapshotHelp(cmd)).toMatchSnapshot()
+})
+```
+
+`snapshotHelp` renders with `colorDepth: 0` and strips any residual ANSI, so the snapshot is byte-stable.
+
+## Time and env
+
+```ts
+import { freezeTime, withEnv } from '@simtabi/cli-kit-js/testing'
+
+const guard = freezeTime('2026-01-01T00:00:00Z')
+try {
+  // Date.now() and performance.now() pinned
+} finally {
+  guard.restore()
+}
+
+await withEnv({ NO_COLOR: '1', CLIKIT_DETERMINISTIC: '1' }, async () => {
+  // run code that should see disabled colour + deterministic mode
+})
+```
+
+`withEnv` restores even if the callback throws.
+
+## Why throw on mismatch?
+
+Every matcher throws a descriptive `Error` rather than returning a result. Vitest, Node `test`, Mocha, and Jest all fail on uncaught throws, so the testing package is framework-agnostic.

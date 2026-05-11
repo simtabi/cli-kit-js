@@ -1,0 +1,80 @@
+---
+title: Browser rendering
+description: Mount your CLI's output into a div, or into DevTools console.
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components'
+
+The same renderers (`box`, `table`, `progressBar`, `spinner`, …) work in the browser. Two adapter choices:
+
+- **DOM adapter** — mounts into a target element. Best for in-app terminals and educational playgrounds.
+- **Console adapter** — writes through DevTools `console.log` with `%c` CSS formatting.
+
+## DOM adapter
+
+```ts
+import { createDomAdapter } from '@simtabi/cli-kit-js-io/dom'
+import { box, table, createSpinner } from '@simtabi/cli-kit-js/render'
+
+const io = createDomAdapter({ mount: '#terminal', columns: 100, rows: 32 })
+
+io.write(box('Hello from the browser!', { style: 'round' }) + '\n')
+io.write(table(
+  [['parser', '4 KB'], ['ansi', '2 KB']],
+  { headers: ['pkg', 'size'] },
+) + '\n')
+
+const spin = createSpinner(io, { text: 'Loading…' })
+spin.start()
+setTimeout(() => spin.succeed('Done!'), 1500)
+```
+
+### CSP
+
+The DOM adapter is **strict-CSP compatible**:
+
+```
+default-src 'self';
+script-src 'self';
+style-src 'self' 'unsafe-inline';
+img-src 'self' data:;
+base-uri 'none';
+form-action 'none';
+frame-ancestors 'none';
+```
+
+If your CSP forbids `'unsafe-inline'` for styles, pass a nonce:
+
+```ts
+createDomAdapter({ mount: '#terminal', cspNonce: 'rA…0z' })
+```
+
+<Aside type="caution">
+The DOM adapter **never** uses `innerHTML`, `eval`, `Function`, or inline event handlers. The only attribute it sets on rendered spans is `style` (with a 5-property allowlist) and `data-stream="stderr"` for error rows. Verified by fast-check fuzz across 1000+ random inputs.
+</Aside>
+
+## DevTools console adapter
+
+```ts
+import { createConsoleAdapter } from '@simtabi/cli-kit-js-io/console'
+import { box } from '@simtabi/cli-kit-js/render'
+import { colors } from '@simtabi/cli-kit-js/ansi'
+
+const io = createConsoleAdapter()
+io.write(`${colors.cyan('hello')}\n`)
+// → DevTools shows "hello" in cyan via console.log('%chello', 'color: …')
+
+io.write(box('Status: OK', { style: 'round' }) + '\n')
+```
+
+DevTools is non-interactive — `readKey` / `readLine` throw. For prompts in the browser, use the DOM adapter.
+
+## When isn't TTY?
+
+Browsers report `io.isTTY === true` for the DOM adapter (interactive) and `false` for the console adapter (non-interactive). Renderers and prompts adapt automatically: spinners emit one-shot status lines on non-TTY, prompts fall back to `readLine`.
+
+## XSS-safe by default
+
+User input flowing through `io.write` is HTML-escaped and ANSI-sanitised before reaching the DOM. The `writeRaw` method skips ANSI sanitisation but still HTML-escapes — reserve it for code that emits ANSI you control.

@@ -1,0 +1,47 @@
+---
+title: ansi
+description: SGR colours, allowlist sanitiser, capability detection.
+sidebar:
+  order: 2
+---
+
+`@simtabi/cli-kit-js-ansi` provides everything ANSI-related. Pure functions, runtime-agnostic, browser-safe.
+
+## Capability detection
+
+```ts
+import { detectColorDepth, detectUnicode, detectCapabilities } from '@simtabi/cli-kit-js-ansi'
+
+detectColorDepth() // 0 | 4 | 8 | 24
+detectUnicode()    // true / false
+detectCapabilities() // { color, unicode, hyperlinks, stream }
+```
+
+Honors `NO_COLOR`, `FORCE_COLOR` (0/1/2/3), `CLIKIT_DETERMINISTIC`, `COLORTERM`, `TERM`, modern Windows VT support, and `isTTY`.
+
+## Styling
+
+```ts
+import { colors, createColors } from '@simtabi/cli-kit-js-ansi'
+
+colors.red('error!')              // basic 16-colour
+colors.bold(colors.green('ok'))   // chained
+colors.fg256(208)('orange')       // 256-colour, falls back to 16 if depth < 8
+colors.rgb(255, 100, 50)('peach') // truecolor, falls back to 256 then 16
+
+const fixed = createColors({ depth: 4 })
+fixed.red('hi') // forces 16-colour output
+```
+
+`depth === 0` makes every wrapper a no-op — useful for piped output and `CLIKIT_DETERMINISTIC` mode.
+
+## Sanitisation
+
+```ts
+import { strip, sanitize } from '@simtabi/cli-kit-js-ansi'
+
+strip('\x1b[31mred\x1b[39m')              // 'red'
+sanitize('safe\x1b]52;c;evil\x1b\\done')  // 'safedone' — keeps SGR, strips OSC/DCS/cursor/etc.
+```
+
+`sanitize` is an allowlist filter — anything not SGR is dropped. Hand-walked state machine (not unbounded regex) so it's ReDoS-safe. Fuzz-tested.
