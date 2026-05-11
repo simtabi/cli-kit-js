@@ -20,6 +20,7 @@ export type { IOAdapter, KeyEvent, ResizeListener } from './types'
 export {
   EXIT_ERROR,
   EXIT_OK,
+  EXIT_SIGHUP,
   EXIT_SIGINT,
   EXIT_SIGTERM,
   EXIT_USAGE,

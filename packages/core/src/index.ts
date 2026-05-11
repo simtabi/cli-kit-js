@@ -1,21 +1,40 @@
 /**
  * `@simtabi/cli-kit-js-core`
  *
- * The runtime heart of cli-kit-js:
- *
- *   - `command()` / `defineCommand()` — declarative command builder
- *   - `cli('name')` — fluent OOP builder producing the same immutable config
- *   - `run(command, opts?)` — async-correct runner with:
- *       · signal matrix (SIGINT/SIGTERM/SIGHUP → AbortSignal; SIGPIPE = graceful)
- *       · exit codes (0/1/2/130/143)
- *       · hook bus (before:parse, after:parse, before:run, after:run, on:error, on:help, on:exit)
- *       · lazy subcommand loading
- *       · terminal-state guard
- *       · graceful-shutdown timeout
- *   - `logger` — leveled logger with secret-key redaction
- *   - Help generator with nested-subcommand recursion + `--help=json|markdown|man`
- *
- * Implementation lands in M3.
+ * The runtime heart of cli-kit-js: command definition, fluent builder, async
+ * runner with signal-aware lifecycle, hook bus, help generator, lazy
+ * subcommands, and "did you mean?" suggestions.
  */
 
-export const __version = '0.0.0'
+export { defineCommand, cli, type CommandBuilder } from './define'
+export { run } from './run'
+export { renderHelp, type HelpFormat, type RenderHelpOptions } from './help'
+export { suggest } from './suggest'
+export { HookBus } from './hooks'
+export { isLazyCommand, resolveSubCommand } from './lazy'
+
+export type {
+  ArgsRecord,
+  Command,
+  CommandMeta,
+  CommandLike,
+  HookEvent,
+  HookHandler,
+  HookPayloads,
+  InferArgs,
+  LazyCommand,
+  Plugin,
+  RunContext,
+  RunOptions,
+  RunResult,
+  SubCommands,
+} from './types'
+
+// Re-export the parser's public types so consumers get the full surface from
+// a single import.
+export type {
+  ArgDef,
+  ArgType,
+  ParseError,
+  ParseErrorCode,
+} from '@simtabi/cli-kit-js-parser'
