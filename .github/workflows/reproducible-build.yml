@@ -1,0 +1,86 @@
+name: Reproducible build
+
+# Runs two clean builds on the same commit and compares SHA-256 of every
+# tsup-emitted artefact under `packages/*/dist/`. Non-determinism (timestamps,
+# embedded paths, randomised ordering) fails the job.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: reproducible-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: 22
+  PNPM_VERSION: 9.15.0
+  TURBO_TELEMETRY_DISABLED: 1
+  DO_NOT_TRACK: 1
+  # Pin the timezone + locale so any accidental Date.toString in the build
+  # surface produces identical strings across runs.
+  TZ: UTC
+  LANG: C.UTF-8
+
+jobs:
+  build-twice:
+    name: Build twice, compare artefacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: First build
+        run: |
+          pnpm build
+          find packages/*/dist -type f \( -name '*.js' -o -name '*.cjs' -o -name '*.d.ts' -o -name '*.d.cts' \) \
+            -exec sha256sum {} \; \
+            | sort > build-1.hashes
+
+      - name: Clean
+        run: |
+          find packages -type d -name dist -exec rm -rf {} + 2>/dev/null || true
+          find . -type d -name .turbo -not -path '*/node_modules/*' -exec rm -rf {} + 2>/dev/null || true
+
+      - name: Second build
+        run: |
+          pnpm build
+          find packages/*/dist -type f \( -name '*.js' -o -name '*.cjs' -o -name '*.d.ts' -o -name '*.d.cts' \) \
+            -exec sha256sum {} \; \
+            | sort > build-2.hashes
+
+      - name: Compare
+        run: |
+          if diff -u build-1.hashes build-2.hashes; then
+            echo "::notice::All build artefacts are byte-identical across two runs."
+          else
+            echo "::error::Non-deterministic build detected. The diff above shows which artefacts changed."
+            exit 1
+          fi
+
+      - name: Upload hashes on failure
+        if: failure()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: build-hashes
+          path: |
+            build-1.hashes
+            build-2.hashes
+          retention-days: 7

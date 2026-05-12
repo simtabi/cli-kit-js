@@ -16,16 +16,20 @@ permissions:
   contents: read
   security-events: write
 
-# NOTE: SHA-pinning for the semgrep image is a follow-up in M8 (security
-# hardening pass). For now we pin the major tag; an offline review of the
-# Semgrep release notes is required before each tag bump.
+# Semgrep image is SHA-pinned. To bump:
+#   curl -sI -H "Accept: application/vnd.docker.distribution.manifest.list.v2+json" \
+#     -H "Authorization: Bearer $(curl -s 'https://auth.docker.io/token?service=registry.docker.io&scope=repository:semgrep/semgrep:pull' | jq -r .token)" \
+#     "https://registry-1.docker.io/v2/semgrep/semgrep/manifests/<TAG>" \
+#     | grep -i 'docker-content-digest'
+# Then update the `image:` value below. Dependabot raises the PR when the tag moves.
 jobs:
   scan:
     name: Semgrep scan
     runs-on: ubuntu-latest
     timeout-minutes: 20
     container:
-      image: semgrep/semgrep:1.99
+      # semgrep/semgrep:1.99 resolved 2026-05-11.
+      image: semgrep/semgrep@sha256:ae27024c16f7848cdbfd49c24ed0b78b13f13b85fcd7b87c679aaa8b0c0dce98
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 

@@ -23,6 +23,17 @@
       "cache": false,
       "persistent": true
     },
+    "api:check": {
+      "dependsOn": ["build"],
+      "inputs": ["dist/index.d.ts", "api-extractor.json", "etc/*.api.md"],
+      "outputs": ["temp/**"]
+    },
+    "api:update": {
+      "dependsOn": ["build"],
+      "inputs": ["dist/index.d.ts", "api-extractor.json"],
+      "outputs": ["etc/**"],
+      "cache": false
+    },
     "typecheck": {
       "dependsOn": ["^build"],
       "inputs": ["src/**", "test/**", "tsconfig*.json"],

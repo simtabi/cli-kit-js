@@ -8,6 +8,10 @@ build/
 .turbo/
 *.tsbuildinfo
 
+# api-extractor scratch (per-package etc/*.api.md IS committed; temp/ is not)
+**/temp/
+/temp/
+
 # Test output
 coverage/
 .nyc_output/

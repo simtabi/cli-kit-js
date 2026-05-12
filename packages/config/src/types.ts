@@ -65,6 +65,25 @@ export interface CreateConfigOptions {
   readonly freezeAfterLoad?: boolean
   readonly maxFileBytes?: number
   readonly maxTotalBytes?: number
+  /**
+   * When true, captures every successful `set()` / `reset()` / `assign()`
+   * in a bounded ring buffer (default 1000 entries; configurable via
+   * `auditCapacity`). Inspect with `config.auditLog()`.
+   *
+   * Values whose schema field is marked `sensitive` or `secret` are
+   * redacted to `'[REDACTED]'` in the captured entry.
+   */
+  readonly audit?: boolean
+  /** Maximum number of audit-log entries retained. Default 1000. */
+  readonly auditCapacity?: number
+}
+
+export interface AuditEntry {
+  readonly at: string // ISO timestamp
+  readonly op: 'set' | 'reset' | 'resetAll'
+  readonly path: string
+  readonly previous: unknown
+  readonly next: unknown
 }
 
 export interface ConfigValidationError {
@@ -104,6 +123,12 @@ export interface ConfigInstance {
   onPath(path: string, handler: (prev: unknown, next: unknown) => void): () => void
   /** Validation errors collected at load time (only non-empty when strict=false). */
   readonly validationErrors: readonly ConfigValidationError[]
+  /**
+   * Bounded audit log of mutation operations. Empty array when
+   * `audit: true` wasn't set on `createConfig`. Sensitive/secret fields
+   * are redacted to `'[REDACTED]'`.
+   */
+  auditLog(): readonly AuditEntry[]
 }
 
 export const DEFAULT_MAX_FILE_BYTES = 1_048_576 // 1 MiB

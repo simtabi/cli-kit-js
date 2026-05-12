@@ -12,6 +12,7 @@ export { redactSensitive, deepFreeze, cloneNull } from './redact'
 export { loadLayers, type LayerData } from './loader'
 
 export type {
+  AuditEntry,
   ChangeHandler,
   ConfigInstance,
   ConfigValidationError,

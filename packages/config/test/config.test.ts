@@ -265,3 +265,89 @@ describe('createConfig: security', () => {
     expect(({} as any).polluted).toBeUndefined()
   })
 })
+
+describe('createConfig: audit log', () => {
+  it('returns empty array when audit is not enabled', async () => {
+    const cfg = await createConfig({
+      schema: defineSchema({ x: { type: 'integer', default: 1 } }),
+      configDir: path.join(tmp, 'config'),
+      environment: 'development',
+    })
+    cfg.set('x', 2)
+    expect(cfg.auditLog()).toEqual([])
+  })
+
+  it('records set / reset / resetAll when audit is enabled', async () => {
+    const cfg = await createConfig({
+      schema: defineSchema({ x: { type: 'integer', default: 1 } }),
+      configDir: path.join(tmp, 'config'),
+      environment: 'development',
+      audit: true,
+    })
+    cfg.set('x', 2)
+    cfg.set('x', 3)
+    cfg.reset('x')
+    cfg.resetAll()
+    const log = cfg.auditLog()
+    expect(log.length).toBe(4)
+    expect(log[0]).toMatchObject({ op: 'set', path: 'x', previous: 1, next: 2 })
+    expect(log[1]).toMatchObject({ op: 'set', path: 'x', previous: 2, next: 3 })
+    expect(log[2]).toMatchObject({ op: 'reset', path: 'x', previous: 3, next: 1 })
+    expect(log[3]).toMatchObject({ op: 'resetAll', path: '$' })
+    for (const entry of log) {
+      expect(typeof entry.at).toBe('string')
+      expect(() => new Date(entry.at)).not.toThrow()
+    }
+  })
+
+  it('redacts sensitive paths in the captured entry', async () => {
+    const cfg = await createConfig({
+      schema: defineSchema({
+        apiKey: { type: 'string', sensitive: true, default: 'orig' },
+      }),
+      configDir: path.join(tmp, 'config'),
+      environment: 'development',
+      audit: true,
+    })
+    cfg.set('apiKey', 'new-secret')
+    const [entry] = cfg.auditLog()
+    expect(entry).toBeDefined()
+    expect(entry?.previous).toBe('[REDACTED]')
+    expect(entry?.next).toBe('[REDACTED]')
+  })
+
+  it('bounded ring drops oldest entries past capacity', async () => {
+    const cfg = await createConfig({
+      schema: defineSchema({ x: { type: 'integer', default: 0 } }),
+      configDir: path.join(tmp, 'config'),
+      environment: 'development',
+      audit: true,
+      auditCapacity: 3,
+    })
+    cfg.set('x', 1)
+    cfg.set('x', 2)
+    cfg.set('x', 3)
+    cfg.set('x', 4)
+    cfg.set('x', 5)
+    const log = cfg.auditLog()
+    expect(log.length).toBe(3)
+    expect(log[0]?.next).toBe(3)
+    expect(log[2]?.next).toBe(5)
+  })
+
+  it('returned array is a defensive copy', async () => {
+    const cfg = await createConfig({
+      schema: defineSchema({ x: { type: 'integer', default: 1 } }),
+      configDir: path.join(tmp, 'config'),
+      environment: 'development',
+      audit: true,
+    })
+    cfg.set('x', 2)
+    const snap = cfg.auditLog() as unknown as { length: number }
+    expect(snap.length).toBe(1)
+    cfg.set('x', 3)
+    // Caller's snapshot didn't change.
+    expect(snap.length).toBe(1)
+    expect(cfg.auditLog().length).toBe(2)
+  })
+})

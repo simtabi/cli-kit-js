@@ -15,6 +15,7 @@ import { cloneNull, deepFreeze, redactSensitive } from './redact'
 import { type ResolvedConfig, resolve } from './resolve'
 import { findFieldDef, getPath, setPath, validateField } from './schema'
 import type {
+  AuditEntry,
   ChangeHandler,
   ConfigInstance,
   ConfigValidationError,
@@ -23,6 +24,8 @@ import type {
 } from './types'
 
 const NODE_ENV_DEFAULT = 'development'
+const DEFAULT_AUDIT_CAPACITY = 1000
+const REDACTED = '[REDACTED]'
 
 class Config implements ConfigInstance {
   readonly #opts: Required<
@@ -37,6 +40,9 @@ class Config implements ConfigInstance {
   readonly #changeHandlers = new Set<ChangeHandler>()
   readonly #pathHandlers = new Map<string, Set<(prev: unknown, next: unknown) => void>>()
   #frozen = false
+  readonly #auditEnabled: boolean
+  readonly #auditCapacity: number
+  readonly #audit: AuditEntry[] = []
 
   constructor(
     opts: CreateConfigOptions,
@@ -55,6 +61,31 @@ class Config implements ConfigInstance {
     this.#layers = layers
     this.#resolved = this.#resolve()
     if (opts.freezeAfterLoad) this.#frozen = true
+    this.#auditEnabled = opts.audit === true
+    this.#auditCapacity = opts.auditCapacity ?? DEFAULT_AUDIT_CAPACITY
+  }
+
+  auditLog(): readonly AuditEntry[] {
+    // Defensive copy so callers can't mutate the internal buffer.
+    return this.#audit.slice()
+  }
+
+  #recordAudit(op: AuditEntry['op'], path: string, previous: unknown, next: unknown): void {
+    if (!this.#auditEnabled) return
+    const def = findFieldDef(this.#opts.schema, path)
+    const isSensitive = def?.sensitive === true || def?.secret === true
+    const entry: AuditEntry = {
+      at: new Date().toISOString(),
+      op,
+      path,
+      previous: isSensitive ? REDACTED : previous,
+      next: isSensitive ? REDACTED : next,
+    }
+    this.#audit.push(entry)
+    if (this.#audit.length > this.#auditCapacity) {
+      // Bounded ring — drop the oldest entries.
+      this.#audit.splice(0, this.#audit.length - this.#auditCapacity)
+    }
   }
 
   #resolve(): ResolvedConfig {
@@ -111,6 +142,7 @@ class Config implements ConfigInstance {
       setPath(this.#runtime, path, value)
       this.#resolved = this.#resolve()
       this.#fire(path, prev, value)
+      this.#recordAudit('set', path, prev, value)
       return { ok: true }
     }
     const result = validateField(def, value)
@@ -129,6 +161,7 @@ class Config implements ConfigInstance {
     setPath(this.#runtime, path, result.value)
     this.#resolved = this.#resolve()
     this.#fire(path, prev, result.value)
+    this.#recordAudit('set', path, prev, result.value)
     return { ok: true }
   }
 
@@ -144,18 +177,21 @@ class Config implements ConfigInstance {
 
   reset(path: string): void {
     if (this.#frozen) return
-    // Delete from runtime layer
-    deletePath(this.#runtime, path)
     const prev = this.get(path)
+    deletePath(this.#runtime, path)
     this.#resolved = this.#resolve()
     const next = this.get(path)
-    if (!Object.is(prev, next)) this.#fire(path, prev, next)
+    if (!Object.is(prev, next)) {
+      this.#fire(path, prev, next)
+      this.#recordAudit('reset', path, prev, next)
+    }
   }
 
   resetAll(): void {
     if (this.#frozen) return
     this.#runtime = Object.create(null)
     this.#resolved = this.#resolve()
+    this.#recordAudit('resetAll', '$', undefined, undefined)
   }
 
   snapshot(opts?: { readonly redactSensitive?: boolean }): Readonly<Record<string, unknown>> {

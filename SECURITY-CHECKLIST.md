@@ -60,16 +60,20 @@ Use [`SECURITY.md`](./SECURITY.md) for the receiving end. When a report is accep
 
 ## Closed follow-ups
 
-- ✅ `SecureString` wrapper for password-prompt buffers (`d4a1acc`). Backed by a Uint8Array, zeroed on read/dispose. Exported from `@simtabi/cli-kit-js-prompts`.
-- ✅ `cursorMoves` capability flag exposed on `IOAdapter.capabilities` (`d4a1acc`). Enables future browser-interactive prompts without breaking existing TTY consumers.
+- ✅ `SecureString` wrapper for password-prompt buffers (`d4a1acc`). Uint8Array-backed, zero-filled on read/dispose. Exported from `@simtabi/cli-kit-js-prompts`.
+- ✅ `cursorMoves` capability flag on `IOAdapter.capabilities` (`d4a1acc`). Enables future browser-interactive prompts without API churn.
+- ✅ Full SHA-pin for the Semgrep container image. Now `semgrep/semgrep@sha256:ae27024c…` resolved from Docker Hub registry. Workflow comments document the curl/manifest lookup for tag bumps; Dependabot raises the PR.
+- ✅ Reproducible-build verification CI. `.github/workflows/reproducible-build.yml` builds twice with pinned `TZ=UTC` / `LANG=C.UTF-8`, SHA-256s every emitted artefact, and fails on any difference.
+- ✅ API freeze enforcement via `api-extractor`. Per-package `etc/<name>.api.md` reports committed; `pnpm api:check` CI gate fails any PR that changes the public surface without an updated report + matching changeset.
+- ✅ Audit-log ring buffer for `config.set()`. `audit: true` on `CreateConfigOptions` enables bounded ring (`auditCapacity` default 1000) of `{ at, op, path, previous, next }`. Sensitive paths redacted to `[REDACTED]` at capture.
 
 ## Open follow-ups
 
 These are tracked for future hardening but not blockers for any specific release:
 
-- Full SHA-pin for the Semgrep container image (currently uses minor-version tag).
-- Sigstore key-signing for releases (in addition to npm provenance).
-- Reproducible-build verification across toolchain versions (currently "deterministic given a pinned toolchain").
-- Browser-side prompts: arrow-key navigation in DOM adapter, optionally an xterm.js bridge. The `cursorMoves: false` capability now exists to make this trackable without API churn.
-- Audit-log ring buffer for `config.set()` mutations (toggleable; cost of always-on storage).
-- API freeze enforcement via `api-extractor` once we reach 1.0.
+- Sigstore key-signing for releases (in addition to npm provenance). Phase 4.2.
+- Browser-side prompts: arrow-key navigation in DOM adapter, optionally an xterm.js bridge. `cursorMoves: false` is already wired. Phase 3.
+- OpenSSF Allstar enrollment. Phase 4.4.
+- Migration guide for any breaking changes accumulated across 0.x. Phase 5.2.
+- Final external security audit before tagging 1.0. Phase 5.4.
+- Reach OSSF Scorecard ≥ 9 (currently aiming for ≥ 8). Phase 5.5.

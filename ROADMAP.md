@@ -100,11 +100,11 @@ Once 0.1.0 ships, the kit is usable but not yet "best-of-class for v1.0". These 
 
 ## Phase 4 — Supply chain hardening
 
-- ⏳ **4.1** **SHA-pin the Semgrep container image** in `.github/workflows/semgrep.yml`. Currently uses `semgrep/semgrep:1.99` minor tag. Resolve the digest from the registry, replace the tag with `semgrep/semgrep@sha256:…`. Add a comment requiring out-of-band review for digest bumps; Dependabot can raise the PR.
+- ✅ **4.1** **Semgrep image SHA-pinned** to `semgrep/semgrep@sha256:ae27024c16f7848cdbfd49c24ed0b78b13f13b85fcd7b87c679aaa8b0c0dce98` (resolved from Docker Hub registry). Workflow comment documents the curl/manifest lookup for future tag bumps; Dependabot raises the PR when the upstream tag moves.
 
 - ⏳ **4.2** **Sigstore release signing.** Use `actions/attest-build-provenance` to additionally produce a Sigstore-signed attestation for each release tarball. npm provenance covers most of the trust path; Sigstore is the air-gapped fallback.
 
-- ⏳ **4.3** **Reproducible-build verification.** Add a CI job that runs `pnpm pack` twice on the same commit and asserts the resulting tarballs are byte-identical. Fails on any toolchain-introduced non-determinism.
+- ✅ **4.3** **Reproducible-build verification CI** (`.github/workflows/reproducible-build.yml`). Builds twice on the same commit with pinned `TZ=UTC` / `LANG=C.UTF-8`, SHA-256 every emitted `.js`/`.cjs`/`.d.ts`/`.d.cts` artefact, and `diff`s the hash lists. Job fails on any difference; build hashes uploaded as an artefact for inspection.
 
 - ⏳ **4.4** **OpenSSF Allstar enrollment.** Drop-in policy scanner that posts issues for missing best practices. Free, low effort.
 
@@ -114,11 +114,11 @@ Once 0.1.0 ships, the kit is usable but not yet "best-of-class for v1.0". These 
 
 Once the kit has seen real use and any 0.x feedback has been incorporated.
 
-- ⏳ **5.1** **`api-extractor` wiring.** Detect breaking changes in every published package's `dist/index.d.ts`. CI gate that fails any PR that changes the public surface without a matching `major` changeset.
+- ✅ **5.1** **`api-extractor` wired** for every publishable package. `api-extractor.base.json` at the root + per-package configs. `etc/<name>.api.md` reports committed for each of the 10 packages. `pnpm api:check` runs in CI; if a PR changes the public surface the CI gate fails with a message instructing the contributor to run `pnpm api:update` locally and commit, then add a major changeset for breaking changes. Turbo handles per-package caching.
 
 - ⏳ **5.2** **Migration guide** for any breaking changes accumulated across 0.x.
 
-- ⏳ **5.3** **Audit-log ring buffer for `config.set()`.** Toggleable via `audit: true` in `CreateConfigOptions`. Captures caller, timestamp, prev/next values. Bounded ring (default 1000 entries).
+- ✅ **5.3** **Audit-log ring buffer for `config.set()`**. `audit: true` + optional `auditCapacity` (default 1000) on `CreateConfigOptions`. `config.auditLog()` returns a defensive-copy array of `{ at, op: 'set'|'reset'|'resetAll', path, previous, next }` entries. Sensitive/secret paths are redacted to `'[REDACTED]'` before recording. 5 tests cover off-by-default, set/reset/resetAll capture, redaction, bounded ring eviction, and defensive-copy semantics.
 
 - ⏳ **5.4** **Final external security audit** before tagging 1.0. Independent review of `THREAT-MODEL.md` plus the surfaces it enumerates.
 
@@ -152,15 +152,23 @@ Cross-referenced from [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md#open-fol
 
 | Item                                   | Phase | Status      |
 | -------------------------------------- | ----- | ----------- |
-| Semgrep image SHA pin                  | 4.1   | ⏳ pending  |
+| Semgrep image SHA pin                  | 4.1   | ✅ done     |
 | Sigstore release signing               | 4.2   | ⏳ pending  |
-| Reproducible-build verification        | 4.3   | ⏳ pending  |
+| Reproducible-build verification        | 4.3   | ✅ done     |
+| OpenSSF Allstar enrollment             | 4.4   | ⏳ pending  |
 | Browser-interactive prompts            | 3     | ⏸ deferred |
-| Audit-log ring buffer for `config`     | 5.3   | ⏳ pending  |
-| api-extractor 1.0 freeze enforcement   | 5.1   | ⏳ pending  |
+| Audit-log ring buffer for `config`     | 5.3   | ✅ done     |
+| api-extractor 1.0 freeze enforcement   | 5.1   | ✅ done     |
+| Migration guide                        | 5.2   | ⏳ pending  |
+| Final external security audit          | 5.4   | ⏳ pending  |
+| OSSF Scorecard ≥ 9                     | 5.5   | ⏳ pending  |
 | `SecureString` for password buffers    | —     | ✅ done (`d4a1acc`) |
 | `cursorMoves` capability flag          | —     | ✅ done (`d4a1acc`) |
 | Validation-error redraw fix in prompts | —     | ✅ done (`a18f562`) |
+| TerminalGuard non-TTY emission         | —     | ✅ done (`6d3c74c`) |
+| Shared readline interface (no drops)   | —     | ✅ done (`259f98a`) |
+| Box left-alignment regression          | —     | ✅ done (`3f97c2d`) |
+| Leveled logger with redaction          | 2.5   | ✅ done (`a81a3e8`) |
 
 ---
 

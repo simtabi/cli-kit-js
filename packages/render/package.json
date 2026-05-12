@@ -30,8 +30,10 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "LICENSE"],
-  "engines": { "node": ">=22.0.0" },
+  "files": ["dist", "README.md", "LICENSE", "etc"],
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "sideEffects": false,
   "keywords": ["cli", "cli-kit", "render", "box", "table", "progress", "spinner", "ansi-html"],
   "publishConfig": {
@@ -44,7 +46,9 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "size": "size-limit",
-    "clean": "rm -rf dist .turbo coverage"
+    "clean": "rm -rf dist .turbo coverage",
+    "api:check": "api-extractor run --verbose",
+    "api:update": "api-extractor run --local --verbose"
   },
   "size-limit": [
     {
@@ -66,6 +70,7 @@
     "@simtabi/cli-kit-js-io": "workspace:*"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "catalog:",
     "@size-limit/preset-small-lib": "catalog:",
     "@types/node": "catalog:",
     "fast-check": "catalog:",
