@@ -1,0 +1,94 @@
+---
+title: Migrating from 0.x to 1.0
+description: Breaking changes accumulated across the 0.x line and how to fix them.
+sidebar:
+  order: 10
+---
+
+cli-kit-js follows [Semantic Versioning](https://semver.org/). 1.0 is the
+API-stability commitment: minor / patch releases never introduce a breaking
+change to the public surface checked in `etc/<name>.api.md`.
+
+This page lists every breaking change merged between 0.1 and 1.0, sorted by
+release. Each entry includes the *what*, the *why*, and a `// before / after`
+diff you can apply to your code.
+
+:::note
+The list below is the **draft framework**. As 0.x feedback comes in and
+breakages land, append a section per release. Maintain it in commits, not in
+a separate ledger — the diff history is the source of truth.
+:::
+
+## How to read this page
+
+For each release that contained a breakage:
+
+- **What** — a one-sentence summary of the change.
+- **Why** — the constraint that forced it (correctness, perf, security).
+- **Codemod** — a regex or `ast-grep` snippet you can run, or instructions
+  for a manual fix when no codemod is possible.
+- **Before / after** — minimal diff a typical consumer applies.
+
+## v1.0.0 — initial stable release
+
+API surface frozen. Future minor / patch releases will not break anything
+listed in `etc/<package>.api.md` without going through the deprecation
+flow below.
+
+## Deprecation policy from 1.0 onward
+
+We follow a two-release deprecation window for every API change.
+
+1. **Minor release N**: the new API ships. The old API is marked
+   `@deprecated` in its JSDoc and emits a `console.warn` on first call
+   (once per process). `etc/<package>.api.md` records both.
+2. **Minor release N+1**: the old API still works. The deprecation warning
+   now points at a removal date.
+3. **Major release N+2 (next semver-major)**: the old API is removed.
+   `etc/<package>.api.md` is updated, the warning shim is dropped.
+
+If a security issue forces a faster removal we skip step 2 and document the
+break here. See [`SECURITY.md`](../../../../SECURITY.md) for the threat
+calculus.
+
+## Codemod tooling
+
+We commit codemod scripts under `tools/codemods/` when one is feasible. Run
+them with the project's `pnpm exec jscodeshift` workflow:
+
+```bash
+npx @simtabi/cli-kit-js-codemod@latest <name> path/to/your/src
+```
+
+Each codemod is idempotent — running it twice has no effect after the first
+successful pass.
+
+## Reporting a missed break
+
+If you hit a breaking change that isn't documented here, file an issue with
+the `breaking-change-missed` label so we can backfill the entry. Auditors
+walk this page during compliance reviews — gaps are a defect.
+
+## Future entries (template)
+
+```markdown
+## vX.Y.Z — short title
+
+- **What** — one sentence.
+- **Why** — one sentence.
+- **Codemod** — `tools/codemods/<name>.ts` or "manual".
+
+### Before
+
+\`\`\`ts
+import { oldApi } from '@simtabi/cli-kit-js'
+oldApi({ legacyOption: true })
+\`\`\`
+
+### After
+
+\`\`\`ts
+import { newApi } from '@simtabi/cli-kit-js'
+newApi({ option: true })
+\`\`\`
+```

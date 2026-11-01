@@ -10,17 +10,8 @@
  */
 
 import { colors } from '@simtabi/cli-kit-js-ansi'
-import {
-  RESTORE_CURSOR,
-  SAVE_CURSOR,
-  clearCurrentLine,
-  glyphs,
-  isBackspaceKey,
-  isCancelKey,
-  isEnterKey,
-  isPrintable,
-  throwIfAborted,
-} from './render'
+import { glyphs, isBackspaceKey, isCancelKey, isEnterKey, isPrintable, throwIfAborted } from './render'
+import { createPromptRenderer } from './renderer'
 import { SecureString } from './secure-string'
 import { type PasswordPromptOptions, PromptCancelledError } from './types'
 
@@ -37,47 +28,44 @@ export async function password(opts: PasswordPromptOptions): Promise<string> {
 
   const g = glyphs(io)
   const buffer = new SecureString()
-  let charCount = 0 // number of visible chars (for mask rendering)
+  let charCount = 0
   let error: string | null = null
   const sig = signal ?? new AbortController().signal
+  const renderer = createPromptRenderer(io)
 
-  const render = () => {
-    clearCurrentLine(io)
+  const render = (): number => {
     io.writeRaw(`${g.q} ${message} ${g.arrow} ${mask.repeat(charCount)}`)
-    io.writeRaw(SAVE_CURSOR)
-    io.writeRaw('\n\x1b[K')
-    if (error) io.writeRaw(colors.red(`  ${error}`))
-    io.writeRaw(RESTORE_CURSOR)
+    if (error) {
+      io.writeRaw(`\n${colors.red(`  ${error}`)}`)
+      return 2
+    }
+    return 1
   }
 
-  render()
+  renderer.paint(render)
   try {
     while (true) {
       const key = await io.readKey(sig)
       if (isCancelKey(key)) {
+        renderer.end()
         io.writeRaw('\n')
         buffer.dispose()
         throw new PromptCancelledError()
       }
       if (isEnterKey(key)) {
         if (validate) {
-          // peek() keeps the buffer alive in case validation fails and the
-          // user wants to edit. The materialised string is a regular JS
-          // primitive but exists only for the duration of the validate call
-          // when validation passes (we immediately read+dispose below) or
-          // until the next garbage collection when it fails.
           const candidate = buffer.peek()
           const r = validate(candidate)
           if (r !== true) {
             error = r
-            render()
+            renderer.paint(render)
             continue
           }
         }
-        const value = buffer.read() // zeroes the buffer
-        io.writeRaw(SAVE_CURSOR)
-        io.writeRaw('\n\x1b[K')
-        io.writeRaw(RESTORE_CURSOR)
+        const value = buffer.read()
+        error = null
+        renderer.paint(render)
+        renderer.end()
         io.writeRaw('\n')
         return value
       }
@@ -87,18 +75,18 @@ export async function password(opts: PasswordPromptOptions): Promise<string> {
           charCount--
           error = null
         }
-        render()
+        renderer.paint(render)
         continue
       }
       if (isPrintable(key)) {
         buffer.appendChar(key.raw)
         charCount++
         error = null
-        render()
+        renderer.paint(render)
       }
     }
   } catch (err) {
-    // Any non-cancel exit path (parse / write failure) — wipe.
+    renderer.end()
     buffer.dispose()
     throw err
   }

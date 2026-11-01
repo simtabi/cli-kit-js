@@ -5,24 +5,15 @@
  *
  * Enter accepts (uses `default` if buffer is empty). Backspace removes the
  * last char. Ctrl+C / Escape cancel. Validation runs on Enter; failure shows
- * the error message on the line below and keeps the prompt open. The error
- * row is wiped on the next render so it never lingers.
+ * the error on the line below and keeps the prompt open. The error row is
+ * wiped on the next render so it never lingers.
  *
  * Non-TTY fallback: writes the message, reads one line via `io.readLine`.
  */
 
 import { colors } from '@simtabi/cli-kit-js-ansi'
-import {
-  RESTORE_CURSOR,
-  SAVE_CURSOR,
-  clearCurrentLine,
-  glyphs,
-  isBackspaceKey,
-  isCancelKey,
-  isEnterKey,
-  isPrintable,
-  throwIfAborted,
-} from './render'
+import { glyphs, isBackspaceKey, isCancelKey, isEnterKey, isPrintable, throwIfAborted } from './render'
+import { createPromptRenderer } from './renderer'
 import { PromptCancelledError, type TextPromptOptions } from './types'
 
 export async function text(opts: TextPromptOptions): Promise<string> {
@@ -47,6 +38,7 @@ export async function text(opts: TextPromptOptions): Promise<string> {
   let buffer = ''
   let error: string | null = null
   const sig = signal ?? new AbortController().signal
+  const renderer = createPromptRenderer(io)
 
   const placeholder = opts.placeholder
     ? colors.gray(opts.placeholder)
@@ -54,56 +46,59 @@ export async function text(opts: TextPromptOptions): Promise<string> {
       ? colors.gray(defaultValue)
       : ''
 
-  const render = () => {
-    clearCurrentLine(io)
+  const render = (): number => {
     const display = buffer.length > 0 ? buffer : placeholder
     io.writeRaw(`${g.q} ${message} ${g.arrow} ${display}`)
-    // Save cursor at end of input, drop to next line, write error or clear
-    // the row, then restore the cursor. Error rows therefore never linger.
-    io.writeRaw(SAVE_CURSOR)
-    io.writeRaw('\n\x1b[K')
-    if (error) io.writeRaw(colors.red(`  ${error}`))
-    io.writeRaw(RESTORE_CURSOR)
+    if (error) {
+      io.writeRaw(`\n${colors.red(`  ${error}`)}`)
+      return 2
+    }
+    return 1
   }
 
-  render()
+  renderer.paint(render)
 
-  while (true) {
-    const key = await io.readKey(sig)
-    if (isCancelKey(key)) {
-      io.writeRaw('\n')
-      throw new PromptCancelledError()
-    }
-    if (isEnterKey(key)) {
-      const value = buffer.length > 0 ? buffer : (defaultValue ?? '')
-      if (validate) {
-        const r = validate(value)
-        if (r !== true) {
-          error = r
-          render()
-          continue
+  try {
+    while (true) {
+      const key = await io.readKey(sig)
+      if (isCancelKey(key)) {
+        renderer.end()
+        io.writeRaw('\n')
+        throw new PromptCancelledError()
+      }
+      if (isEnterKey(key)) {
+        const value = buffer.length > 0 ? buffer : (defaultValue ?? '')
+        if (validate) {
+          const r = validate(value)
+          if (r !== true) {
+            error = r
+            renderer.paint(render)
+            continue
+          }
         }
-      }
-      // Wipe the error row before leaving so the caller's next output
-      // doesn't start with our debris.
-      io.writeRaw(SAVE_CURSOR)
-      io.writeRaw('\n\x1b[K')
-      io.writeRaw(RESTORE_CURSOR)
-      io.writeRaw('\n')
-      return value
-    }
-    if (isBackspaceKey(key)) {
-      if (buffer.length > 0) {
-        buffer = buffer.slice(0, -1)
+        // Final paint without the error row, so caller's next output is clean.
         error = null
+        renderer.paint(render)
+        renderer.end()
+        io.writeRaw('\n')
+        return value
       }
-      render()
-      continue
+      if (isBackspaceKey(key)) {
+        if (buffer.length > 0) {
+          buffer = buffer.slice(0, -1)
+          error = null
+        }
+        renderer.paint(render)
+        continue
+      }
+      if (isPrintable(key)) {
+        buffer += key.raw
+        error = null
+        renderer.paint(render)
+      }
     }
-    if (isPrintable(key)) {
-      buffer += key.raw
-      error = null
-      render()
-    }
+  } catch (err) {
+    renderer.end()
+    throw err
   }
 }

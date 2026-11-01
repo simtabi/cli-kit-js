@@ -10,7 +10,8 @@
  */
 
 import { colors } from '@simtabi/cli-kit-js-ansi'
-import { clearLinesAbove, glyphs, isCancelKey, isEnterKey, throwIfAborted } from './render'
+import { glyphs, isCancelKey, isEnterKey, throwIfAborted } from './render'
+import { createPromptRenderer } from './renderer'
 import { type MultiselectPromptOptions, PromptCancelledError, type SelectOption } from './types'
 
 export async function multiselect<T = string>(opts: MultiselectPromptOptions<T>): Promise<T[]> {
@@ -34,12 +35,11 @@ export async function multiselect<T = string>(opts: MultiselectPromptOptions<T>)
     }
   }
   const sig = signal ?? new AbortController().signal
-  let renderedLines = 0
+  const renderer = createPromptRenderer(io)
   let error: string | null = null
 
-  const render = (clear = true) => {
-    if (clear) clearLinesAbove(io, renderedLines - 1)
-    let lines = 1
+  const render = (): number => {
+    let rows = 1
     io.writeRaw(`${g.q} ${message} ${g.arrow}\n`)
     for (let i = 0; i < options.length; i++) {
       const o = options[i]
@@ -50,67 +50,72 @@ export async function multiselect<T = string>(opts: MultiselectPromptOptions<T>)
       const bullet = isSelected ? g.bulletOn : g.bulletOff
       const label = o.disabled ? colors.gray(o.label) : isCursor ? colors.cyan(o.label) : o.label
       io.writeRaw(`${pointer} ${bullet} ${label}\n`)
-      lines++
+      rows++
     }
     if (error) {
       io.writeRaw(`${colors.red(error)}\n`)
-      lines++
+      rows++
     }
-    renderedLines = lines
+    return rows
   }
 
-  render(false)
+  renderer.paint(render)
 
-  while (true) {
-    const key = await io.readKey(sig)
-    if (isCancelKey(key)) throw new PromptCancelledError()
+  try {
+    while (true) {
+      const key = await io.readKey(sig)
+      if (isCancelKey(key)) throw new PromptCancelledError()
 
-    if (isEnterKey(key)) {
-      if (selected.size < min) {
-        error = `select at least ${min}`
-        render()
+      if (isEnterKey(key)) {
+        if (selected.size < min) {
+          error = `select at least ${min}`
+          renderer.paint(render)
+          continue
+        }
+        if (selected.size > max) {
+          error = `select at most ${max}`
+          renderer.paint(render)
+          continue
+        }
+        const out: T[] = []
+        for (let i = 0; i < options.length; i++) {
+          if (selected.has(i) && options[i]) out.push((options[i] as SelectOption<T>).value)
+        }
+        renderer.end()
+        return out
+      }
+      if (key.raw === ' ' || key.name === 'space') {
+        const o = options[cursor]
+        if (!o || o.disabled) continue
+        if (selected.has(cursor)) selected.delete(cursor)
+        else selected.add(cursor)
+        error = null
+        renderer.paint(render)
         continue
       }
-      if (selected.size > max) {
-        error = `select at most ${max}`
-        render()
+      if (key.name === 'up' || key.name === 'k') {
+        cursor = moveCursor(cursor, -1, options)
+        renderer.paint(render)
         continue
       }
-      const out: T[] = []
-      for (let i = 0; i < options.length; i++) {
-        if (selected.has(i) && options[i]) out.push((options[i] as SelectOption<T>).value)
+      if (key.name === 'down' || key.name === 'j') {
+        cursor = moveCursor(cursor, 1, options)
+        renderer.paint(render)
+        continue
       }
-      return out
-    }
-    if (key.raw === ' ' || key.name === 'space') {
-      const o = options[cursor]
-      if (!o || o.disabled) continue
-      if (selected.has(cursor)) selected.delete(cursor)
-      else selected.add(cursor)
-      error = null
-      render()
-      continue
-    }
-    if (key.name === 'up' || key.name === 'k') {
-      cursor = moveCursor(cursor, -1, options)
-      render()
-      continue
-    }
-    if (key.name === 'down' || key.name === 'j') {
-      cursor = moveCursor(cursor, 1, options)
-      render()
-      continue
-    }
-    if (key.name === 'a' && key.ctrl) {
-      // Ctrl+A select all (subject to max)
-      const all = new Set<number>()
-      for (let i = 0; i < options.length && all.size < max; i++) {
-        if (!options[i]?.disabled) all.add(i)
+      if (key.name === 'a' && key.ctrl) {
+        const all = new Set<number>()
+        for (let i = 0; i < options.length && all.size < max; i++) {
+          if (!options[i]?.disabled) all.add(i)
+        }
+        selected.clear()
+        for (const v of all) selected.add(v)
+        renderer.paint(render)
       }
-      selected.clear()
-      for (const v of all) selected.add(v)
-      render()
     }
+  } catch (err) {
+    renderer.end()
+    throw err
   }
 }
 

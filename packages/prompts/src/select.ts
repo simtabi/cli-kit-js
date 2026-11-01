@@ -11,7 +11,8 @@
  */
 
 import { colors } from '@simtabi/cli-kit-js-ansi'
-import { clearLinesAbove, glyphs, isCancelKey, isEnterKey, throwIfAborted } from './render'
+import { glyphs, isCancelKey, isEnterKey, throwIfAborted } from './render'
+import { createPromptRenderer } from './renderer'
 import { PromptCancelledError, type SelectOption, type SelectPromptOptions } from './types'
 
 export async function select<T = string>(opts: SelectPromptOptions<T>): Promise<T> {
@@ -26,11 +27,10 @@ export async function select<T = string>(opts: SelectPromptOptions<T>): Promise<
   const g = glyphs(io)
   let cursor = clampCursor(opts.initial ?? 0, options)
   const sig = signal ?? new AbortController().signal
-  let renderedLines = 0
+  const renderer = createPromptRenderer(io)
 
-  const render = (clear = true) => {
-    if (clear) clearLinesAbove(io, renderedLines - 1)
-    let lines = 1
+  const render = (): number => {
+    let rows = 1
     io.writeRaw(`${g.q} ${message} ${g.arrow}\n`)
     for (let i = 0; i < options.length; i++) {
       const o = options[i]
@@ -46,42 +46,48 @@ export async function select<T = string>(opts: SelectPromptOptions<T>): Promise<
         io.writeRaw(`  ${colors.gray(o.description)}`)
       }
       io.writeRaw('\n')
-      lines++
+      rows++
     }
-    renderedLines = lines
+    return rows
   }
 
-  render(false)
+  renderer.paint(render)
 
-  while (true) {
-    const key = await io.readKey(sig)
-    if (isCancelKey(key)) {
-      throw new PromptCancelledError()
+  try {
+    while (true) {
+      const key = await io.readKey(sig)
+      if (isCancelKey(key)) {
+        throw new PromptCancelledError()
+      }
+      if (isEnterKey(key)) {
+        const chosen = options[cursor]
+        if (!chosen || chosen.disabled) continue
+        renderer.end()
+        return chosen.value
+      }
+      if (key.name === 'up' || key.name === 'k') {
+        cursor = moveCursor(cursor, -1, options)
+        renderer.paint(render)
+        continue
+      }
+      if (key.name === 'down' || key.name === 'j') {
+        cursor = moveCursor(cursor, 1, options)
+        renderer.paint(render)
+        continue
+      }
+      if (key.name === 'home') {
+        cursor = firstEnabled(options)
+        renderer.paint(render)
+        continue
+      }
+      if (key.name === 'end') {
+        cursor = lastEnabled(options)
+        renderer.paint(render)
+      }
     }
-    if (isEnterKey(key)) {
-      const chosen = options[cursor]
-      if (!chosen || chosen.disabled) continue
-      return chosen.value
-    }
-    if (key.name === 'up' || key.name === 'k') {
-      cursor = moveCursor(cursor, -1, options)
-      render()
-      continue
-    }
-    if (key.name === 'down' || key.name === 'j') {
-      cursor = moveCursor(cursor, 1, options)
-      render()
-      continue
-    }
-    if (key.name === 'home') {
-      cursor = firstEnabled(options)
-      render()
-      continue
-    }
-    if (key.name === 'end') {
-      cursor = lastEnabled(options)
-      render()
-    }
+  } catch (err) {
+    renderer.end()
+    throw err
   }
 }
 

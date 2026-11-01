@@ -1,0 +1,4 @@
+## Requires a SECURITY.md and a working private vulnerability disclosure path.
+optConfig:
+  optIn: true
+action: issue

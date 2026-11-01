@@ -17,6 +17,27 @@ export interface KeyEvent {
 export type ResizeListener = () => void
 
 /**
+ * A re-paintable region anchored at the current write position.
+ *
+ * Returned by `IOAdapter.beginRegion?()` on adapters that can't honour ANSI
+ * cursor moves (DOM, memory in `cursorMoves: false` mode). While a region is
+ * open, every write to the parent adapter is scoped to the region's storage
+ * — `clear()` wipes only the region's content, leaving prior output intact.
+ *
+ * Prompts use this to support browser-interactive rendering without emitting
+ * ANSI escape sequences that the DOM would otherwise render as literal text.
+ */
+export interface OutputRegion {
+  /** Wipe the region's content. The next write begins at the region's start. */
+  clear(): void
+  /**
+   * Finalize the region. Subsequent writes through the parent adapter go
+   * below the region's last content. Idempotent.
+   */
+  end(): void
+}
+
+/**
  * The single abstraction over stdin/stdout/stderr that the rest of cli-kit-js
  * writes to. Implementations exist for Node, browser DOM, browser DevTools
  * console, and in-memory testing buffers.
@@ -65,6 +86,16 @@ export interface IOAdapter {
    * Idempotent if invoked multiple times with the same callback.
    */
   onResize(listener: ResizeListener): () => void
+
+  /**
+   * Open a re-paintable region for prompt-style redraws. Adapters that
+   * honour ANSI cursor moves (Node TTY) may leave this `undefined` — callers
+   * should fall back to `\x1b[NA\x1b[J`-style redraws in that case.
+   * Adapters that can't honour ANSI moves (DOM, in-memory `cursorMoves:
+   * false`) implement this to provide a sub-element / sub-buffer that
+   * `clear()` wipes.
+   */
+  beginRegion?(): OutputRegion
 }
 
 /** Public exit codes used across the runtime. */

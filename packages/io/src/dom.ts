@@ -16,7 +16,7 @@
  */
 
 import { type Capabilities, detectCapabilities, sanitize, strip } from '@simtabi/cli-kit-js-ansi'
-import type { IOAdapter, KeyEvent, ResizeListener } from './types'
+import type { IOAdapter, KeyEvent, OutputRegion, ResizeListener } from './types'
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Safe ANSI → DOM emission
@@ -241,7 +241,14 @@ interface PendingLine {
 }
 
 class DomAdapter implements IOAdapter {
-  readonly #mount: Element
+  readonly #rootMount: Element
+  /**
+   * Current write target. Defaults to #rootMount; pushed onto a region stack
+   * when `beginRegion()` opens a child mount so prompts can redraw without
+   * disturbing prior output.
+   */
+  #writeTarget: Element
+  readonly #regionStack: Element[] = []
   readonly #columns: number
   readonly #rows: number
   readonly #capabilities: Capabilities
@@ -259,7 +266,8 @@ class DomAdapter implements IOAdapter {
         `DomAdapter: mount target ${JSON.stringify(opts.mount)} not found in document`,
       )
     }
-    this.#mount = mount
+    this.#rootMount = mount
+    this.#writeTarget = mount
     // opts.cspNonce reserved for future <style nonce="…"> emission; stored
     // implicitly by the API contract but unused today.
     void opts.cspNonce
@@ -292,7 +300,36 @@ class DomAdapter implements IOAdapter {
   }
 
   clear(): void {
-    while (this.#mount.firstChild) this.#mount.removeChild(this.#mount.firstChild)
+    // Reset to the root mount, then wipe everything. Any open regions go
+    // with it — `clear()` is "wipe the screen", not "wipe the current region".
+    this.#regionStack.length = 0
+    this.#writeTarget = this.#rootMount
+    while (this.#rootMount.firstChild) this.#rootMount.removeChild(this.#rootMount.firstChild)
+  }
+
+  beginRegion(): OutputRegion {
+    const parent = this.#writeTarget
+    const region = document.createElement('div')
+    region.setAttribute('data-cli-region', '')
+    parent.appendChild(region)
+    this.#regionStack.push(parent)
+    this.#writeTarget = region
+    let ended = false
+    return {
+      clear: () => {
+        if (ended) return
+        while (region.firstChild) region.removeChild(region.firstChild)
+      },
+      end: () => {
+        if (ended) return
+        ended = true
+        // Pop only if this region is still on top. If a later region was opened
+        // and never ended (programmer error), leave the stack as-is.
+        if (this.#writeTarget === region) {
+          this.#writeTarget = this.#regionStack.pop() ?? this.#rootMount
+        }
+      },
+    }
   }
 
   get columns(): number {
@@ -400,7 +437,7 @@ class DomAdapter implements IOAdapter {
         span.textContent = seg.text
         node = span
       }
-      this.#mount.appendChild(node)
+      this.#writeTarget.appendChild(node)
     }
   }
 

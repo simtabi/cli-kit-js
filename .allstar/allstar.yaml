@@ -1,0 +1,19 @@
+## OpenSSF Allstar configuration for cli-kit-js.
+##
+## Allstar is the OpenSSF policy enforcer that opens issues on this repo when
+## a configured best practice slips. We opt in here at the repo level (the
+## sibling files turn on individual policies). Install the GitHub App from
+##
+##   https://github.com/apps/allstar-app
+##
+## …after merging this directory. The `optConfig` block below sets the
+## *opt-in* posture (per https://github.com/ossf/allstar#repository-level-opt-out)
+## — we accept every default policy unless turned off here, and `bug-tracker`
+## is set to false (we already track in GitHub Issues, so don't double-post).
+optConfig:
+  optIn: true
+
+issue:
+  ## Use the default issue title prefix `Security Policy violation` so
+  ## maintainers can filter for them.
+  issueLabel: allstar

@@ -1,0 +1,5 @@
+## Binary artifacts policy. cli-kit-js ships only source + emitted dist/.js
+## from a CI build; any committed `.exe`, `.so`, or compiled blob is suspect.
+optConfig:
+  optIn: true
+action: issue

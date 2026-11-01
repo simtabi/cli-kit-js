@@ -7,7 +7,8 @@
  * anything else: ignored. Ctrl+C / Escape cancel.
  */
 
-import { clearCurrentLine, glyphs, isCancelKey, isEnterKey, throwIfAborted } from './render'
+import { glyphs, isCancelKey, isEnterKey, throwIfAborted } from './render'
+import { createPromptRenderer } from './renderer'
 import { type ConfirmPromptOptions, PromptCancelledError } from './types'
 
 export async function confirm(opts: ConfirmPromptOptions): Promise<boolean> {
@@ -28,30 +29,41 @@ export async function confirm(opts: ConfirmPromptOptions): Promise<boolean> {
   const yn = defaultValue ? 'Y/n' : 'y/N'
   const sig = signal ?? new AbortController().signal
   const g = glyphs(io)
+  const renderer = createPromptRenderer(io)
 
-  const render = () => {
-    clearCurrentLine(io)
+  const render = (): number => {
     io.writeRaw(`${g.q} ${message} (${yn}) ${g.arrow} `)
+    return 1
   }
-  render()
 
-  while (true) {
-    const key = await io.readKey(sig)
-    if (isCancelKey(key)) {
-      io.writeRaw('\n')
-      throw new PromptCancelledError()
+  renderer.paint(render)
+
+  try {
+    while (true) {
+      const key = await io.readKey(sig)
+      if (isCancelKey(key)) {
+        renderer.end()
+        io.writeRaw('\n')
+        throw new PromptCancelledError()
+      }
+      if (isEnterKey(key)) {
+        renderer.end()
+        io.writeRaw(`${defaultValue ? 'Y' : 'N'}\n`)
+        return defaultValue
+      }
+      if (key.name === 'y' || key.raw === 'Y' || key.raw === 'y') {
+        renderer.end()
+        io.writeRaw('Y\n')
+        return true
+      }
+      if (key.name === 'n' || key.raw === 'N' || key.raw === 'n') {
+        renderer.end()
+        io.writeRaw('N\n')
+        return false
+      }
     }
-    if (isEnterKey(key)) {
-      io.writeRaw(`${defaultValue ? 'Y' : 'N'}\n`)
-      return defaultValue
-    }
-    if (key.name === 'y' || key.raw === 'Y' || key.raw === 'y') {
-      io.writeRaw('Y\n')
-      return true
-    }
-    if (key.name === 'n' || key.raw === 'N' || key.raw === 'n') {
-      io.writeRaw('N\n')
-      return false
-    }
+  } catch (err) {
+    renderer.end()
+    throw err
   }
 }

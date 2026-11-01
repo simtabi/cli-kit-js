@@ -11,7 +11,8 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
-  id-token: write  # required for npm provenance via OIDC
+  id-token: write  # required for npm provenance + Sigstore via OIDC
+  attestations: write  # required for actions/attest-build-provenance
 
 env:
   NODE_VERSION: 22
@@ -57,3 +58,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
+
+      # Sigstore-signed attestation for every emitted tarball, on top of npm
+      # provenance. Provides an air-gapped fallback against any single trust-
+      # path compromise (npm OIDC + Sigstore both have to be broken to forge
+      # a release). Only runs when changesets actually published something —
+      # `published` is the action's output flag.
+      - name: Pack tarballs for attestation
+        if: steps.changesets.outputs.published == 'true'
+        run: pnpm -r exec -- pnpm pack --pack-destination "$GITHUB_WORKSPACE/.tarballs"
+
+      - name: Attest tarballs with Sigstore
+        if: steps.changesets.outputs.published == 'true'
+        uses: actions/attest-build-provenance@7668571508540a607bdfd90a87a560489fe372eb # v2.1.0
+        with:
+          subject-path: ".tarballs/*.tgz"

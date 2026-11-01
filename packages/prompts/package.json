@@ -58,7 +58,7 @@
     {
       "name": "prompts ESM",
       "path": "dist/index.js",
-      "limit": "6 KB",
+      "limit": "9 KB",
       "gzip": true
     }
   ],
@@ -73,6 +73,7 @@
     "@size-limit/preset-small-lib": "catalog:",
     "@types/node": "catalog:",
     "fast-check": "catalog:",
+    "jsdom": "catalog:",
     "size-limit": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",

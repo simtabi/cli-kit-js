@@ -1,0 +1,7 @@
+## Outside collaborator policy. Flags any external collaborator with write or
+## admin access — push rights should be limited to org members.
+optConfig:
+  optIn: true
+action: issue
+pushAllowed: false
+adminAllowed: false

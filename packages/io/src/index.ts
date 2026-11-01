@@ -16,7 +16,7 @@ export { createNodeStdio, type NodeStdioAdapterOptions } from './node'
 export { MemoryAdapter, type MemoryAdapterOptions } from './memory'
 export { SignalController, type SignalControllerOptions } from './signals'
 export { TerminalGuard, type TerminalGuardOptions } from './terminal-guard'
-export type { IOAdapter, KeyEvent, ResizeListener } from './types'
+export type { IOAdapter, KeyEvent, OutputRegion, ResizeListener } from './types'
 export {
   EXIT_ERROR,
   EXIT_OK,

@@ -30,6 +30,7 @@ export const EXIT_USAGE = 2;
 
 // @public
 export interface IOAdapter {
+    beginRegion?(): OutputRegion;
     readonly capabilities: Capabilities;
     clear(): void;
     readonly columns: number;
@@ -60,6 +61,7 @@ export interface KeyEvent {
 // @public (undocumented)
 export class MemoryAdapter implements IOAdapter {
     constructor(opts?: MemoryAdapterOptions);
+    beginRegion(): OutputRegion;
     // (undocumented)
     get capabilities(): Capabilities;
     // (undocumented)
@@ -119,6 +121,12 @@ export interface NodeStdioAdapterOptions {
     readonly stderr?: NodeJS.WriteStream;
     readonly stdin?: NodeJS.ReadStream;
     readonly stdout?: NodeJS.WriteStream;
+}
+
+// @public
+export interface OutputRegion {
+    clear(): void;
+    end(): void;
 }
 
 // @public (undocumented)

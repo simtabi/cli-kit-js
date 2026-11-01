@@ -7,6 +7,19 @@
 import { IOAdapter } from '@simtabi/cli-kit-js-io';
 
 // @public
+export function autocomplete<T = string>(opts: AutocompletePromptOptions<T>): Promise<T>;
+
+// @public (undocumented)
+export interface AutocompletePromptOptions<T = string> extends PromptBase {
+    readonly maxResults?: number;
+    // (undocumented)
+    readonly source: AutocompleteSource<T>;
+}
+
+// @public
+export type AutocompleteSource<T = string> = readonly SelectOption<T>[] | ((query: string) => Promise<readonly SelectOption<T>[]>);
+
+// @public
 function confirm_2(opts: ConfirmPromptOptions): Promise<boolean>;
 export { confirm_2 as confirm }
 
@@ -15,6 +28,92 @@ export interface ConfirmPromptOptions extends PromptBase {
     // (undocumented)
     readonly default?: boolean;
 }
+
+// @public
+export function countNewlines(s: string): number;
+
+// @public (undocumented)
+export function createPromptRenderer(io: IOAdapter): PromptRenderer;
+
+// @public
+export function editList(opts: EditListPromptOptions): Promise<readonly string[]>;
+
+// @public (undocumented)
+export interface EditListPromptOptions extends PromptBase {
+    // (undocumented)
+    readonly initial?: readonly string[];
+    // (undocumented)
+    readonly max?: number;
+    // (undocumented)
+    readonly min?: number;
+    readonly separator?: string;
+    // (undocumented)
+    readonly validate?: (item: string) => ValidateResult;
+}
+
+// @public
+export function form(opts: FormOptions): Promise<Readonly<Record<string, unknown>>>;
+
+// Warning: (ae-forgotten-export) The symbol "FieldBase" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type FormField = (FieldBase & {
+    readonly kind: 'text';
+    readonly default?: string;
+    readonly placeholder?: string;
+    readonly validate?: (value: string) => ValidateResult;
+}) | (FieldBase & {
+    readonly kind: 'password';
+    readonly mask?: string;
+    readonly validate?: (value: string) => ValidateResult;
+}) | (FieldBase & {
+    readonly kind: 'confirm';
+    readonly default?: boolean;
+}) | (FieldBase & {
+    readonly kind: 'number';
+    readonly default?: number;
+    readonly min?: number;
+    readonly max?: number;
+    readonly step?: number;
+    readonly integer?: boolean;
+    readonly validate?: (value: number) => ValidateResult;
+}) | (FieldBase & {
+    readonly kind: 'select';
+    readonly options: readonly SelectOption<string>[];
+    readonly initial?: number;
+}) | (FieldBase & {
+    readonly kind: 'multiselect';
+    readonly options: readonly SelectOption<string>[];
+    readonly initialSelected?: readonly string[];
+    readonly minSelected?: number;
+    readonly maxSelected?: number;
+}) | (FieldBase & {
+    readonly kind: 'autocomplete';
+    readonly source: AutocompleteSource<string>;
+    readonly maxResults?: number;
+}) | (FieldBase & {
+    readonly kind: 'editList';
+    readonly initial?: readonly string[];
+    readonly min?: number;
+    readonly max?: number;
+    readonly separator?: string;
+    readonly validate?: (item: string) => ValidateResult;
+});
+
+// @public (undocumented)
+export interface FormOptions {
+    // (undocumented)
+    readonly fields: readonly FormField[];
+    // (undocumented)
+    readonly io: IOAdapter;
+    readonly message?: string;
+    // (undocumented)
+    readonly signal?: AbortSignal;
+    readonly validate?: (result: Readonly<Record<string, unknown>>) => ValidateResult;
+}
+
+// @public
+export function intro(io: IOAdapter, message: string): void;
 
 // @public
 export function multiselect<T = string>(opts: MultiselectPromptOptions<T>): Promise<T[]>;
@@ -30,6 +129,29 @@ export interface MultiselectPromptOptions<T = string> extends PromptBase {
     // (undocumented)
     readonly options: readonly SelectOption<T>[];
 }
+
+// @public
+export function note(io: IOAdapter, message: string): void;
+
+// @public
+export function number(opts: NumberPromptOptions): Promise<number>;
+
+// @public (undocumented)
+export interface NumberPromptOptions extends PromptBase {
+    // (undocumented)
+    readonly default?: number;
+    readonly integer?: boolean;
+    // (undocumented)
+    readonly max?: number;
+    // (undocumented)
+    readonly min?: number;
+    readonly step?: number;
+    // (undocumented)
+    readonly validate?: (value: number) => ValidateResult;
+}
+
+// @public
+export function outro(io: IOAdapter, message: string): void;
 
 // @public
 export function password(opts: PasswordPromptOptions): Promise<string>;
@@ -58,6 +180,15 @@ export class PromptCancelledError extends Error {
     // (undocumented)
     readonly name = "PromptCancelledError";
 }
+
+// @public
+export interface PromptRenderer {
+    end(): void;
+    paint(fn: () => number): void;
+}
+
+// @public
+export function rail(io: IOAdapter): void;
 
 // @public
 export class SecureString {
@@ -112,6 +243,43 @@ export interface TextPromptOptions extends PromptBase {
 
 // @public (undocumented)
 export type ValidateResult = true | string;
+
+// @public
+export function wizard<S extends Record<string, unknown> = Record<string, unknown>>(opts: WizardOptions<S>): Promise<S>;
+
+// @public (undocumented)
+export interface WizardContext<S extends Record<string, unknown>> {
+    // (undocumented)
+    readonly io: IOAdapter;
+    // (undocumented)
+    readonly signal?: AbortSignal;
+    // (undocumented)
+    readonly state: Readonly<S>;
+}
+
+// @public (undocumented)
+export interface WizardOptions<S extends Record<string, unknown> = Record<string, unknown>> {
+    readonly intro?: string;
+    // (undocumented)
+    readonly io: IOAdapter;
+    // (undocumented)
+    readonly onComplete?: (state: Readonly<S>) => void | Promise<void>;
+    // (undocumented)
+    readonly signal?: AbortSignal;
+    // (undocumented)
+    readonly steps: readonly WizardStep<S>[];
+}
+
+// @public (undocumented)
+export interface WizardStep<S extends Record<string, unknown> = Record<string, unknown>> {
+    readonly back?: boolean;
+    // (undocumented)
+    readonly id: string;
+    readonly next?: (state: Readonly<S>) => string | false | undefined;
+    // (undocumented)
+    readonly prompt: (ctx: WizardContext<S>) => Promise<unknown>;
+    readonly when?: (state: Readonly<S>) => boolean;
+}
 
 // (No @packageDocumentation comment for this package)
 

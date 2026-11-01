@@ -4,7 +4,7 @@
  */
 
 import { type Capabilities, type ColorDepth, sanitize } from '@simtabi/cli-kit-js-ansi'
-import type { IOAdapter, KeyEvent, ResizeListener } from './types'
+import type { IOAdapter, KeyEvent, OutputRegion, ResizeListener } from './types'
 
 export interface MemoryAdapterOptions {
   readonly columns?: number
@@ -121,6 +121,30 @@ export class MemoryAdapter implements IOAdapter {
       } catch {
         // Listener exceptions are isolated.
       }
+    }
+  }
+
+  /**
+   * Open a re-paintable region. Wraps `stdout` byte offsets so `clear()`
+   * truncates back to the region start. `end()` pops the offset.
+   *
+   * Used by prompts to render into adapters that have `cursorMoves: false`,
+   * including DOM-mode tests configured via `new MemoryAdapter({ cursorMoves:
+   * false })`.
+   */
+  beginRegion(): OutputRegion {
+    const start = this.stdout.length
+    const rawStart = this.rawWrites.length
+    let ended = false
+    return {
+      clear: () => {
+        if (ended) return
+        this.stdout = this.stdout.slice(0, start)
+        this.rawWrites.length = rawStart
+      },
+      end: () => {
+        ended = true
+      },
     }
   }
 

@@ -1,0 +1,27 @@
+## Branch-protection policy. Allstar opens an issue when these knobs slip.
+##
+## Mirrors the manual settings documented in Phase 1.6 of `ROADMAP.md` — kept
+## here so a misconfiguration in the GitHub UI is caught automatically.
+optConfig:
+  optIn: true
+
+action: issue
+
+requireApproval: true
+approvalCount: 1
+dismissStale: true
+requireCodeOwnerReviews: true
+requireStatusChecks: true
+statusChecks:
+  - Lint
+  - Typecheck
+  - Test
+  - Verify zero external runtime deps
+  - Dependency audit
+  - CodeQL
+  - Semgrep
+  - Size Limit
+  - api-surface
+blockForce: true
+requireSignedCommits: true
+enforceOnAdmins: false
