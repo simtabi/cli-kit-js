@@ -1,6 +1,12 @@
-name: Deploy playground
+name: Playground build
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/playground/**'
+      - 'packages/**/src/**'
+      - '.github/workflows/deploy-playground.yml'
   push:
     branches: [main]
     paths:
@@ -16,15 +22,14 @@ concurrency:
 
 permissions:
   contents: read
-  deployments: write
 
 env:
   NODE_VERSION: 22
   PNPM_VERSION: 9.15.0
 
 jobs:
-  build-and-deploy:
-    name: Build + deploy
+  build:
+    name: Build the playground
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -47,10 +52,11 @@ jobs:
       - name: Build playground
         run: pnpm --filter @simtabi/cli-kit-js-playground build
 
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/playground/dist --project-name=cli-kit-js-playground
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      # Publishing moved to deploy-docs.yml, which assembles this build into the
+      # repository's single GitHub Pages site under /playground/. What is left here is
+      # the half that was always worth running: proof the playground still builds.
+      - name: The build produced something
+        run: |
+          test -f apps/playground/dist/index.html \
+            || { echo "::error::playground build produced no index.html"; exit 1; }
+          echo "playground build: $(find apps/playground/dist -type f | wc -l) files"
