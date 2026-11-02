@@ -7,23 +7,23 @@ packages:
 # Centralized dev-dep versions. Reference via "catalog:" in package.json.
 # Bump versions here, every package picks them up.
 catalog:
-  "@biomejs/biome": ^1.9.0
-  "@changesets/cli": ^2.27.0
-  "@commitlint/cli": ^19.0.0
+  "@biomejs/biome": ^2.6.4
+  "@changesets/cli": ^3.0.3
+  "@commitlint/cli": ^21.2.4
   # Ceiling, not a pin: 7.60.1 bundles TypeScript 6.0.3 and cannot follow the `NodeJS`
   # global namespace, which packages/io and packages/ansi expose in their public API.
   # It fails with "Internal Error: Unable to follow symbol for \"NodeJS\"" and reports
   # itself as a software defect. Measured 2026-11-02: 7.58.7 (TypeScript 5.9.3) passes
   # locally, 7.60.1 fails in CI on the same source. Raise the ceiling once upstream fixes it.
   "@microsoft/api-extractor": ">=7.58.7 <7.60.0"
-  "@commitlint/config-conventional": ^19.0.0
+  "@commitlint/config-conventional": ^21.2.4
   "@types/node": ^22.0.0
   "@vitest/coverage-v8": ^2.1.0
   fast-check: ^3.23.0
   jsdom: ^25.0.0
   size-limit: ^11.1.0
   "@size-limit/preset-small-lib": ^11.1.0
-  tsup: ^8.3.0
-  turbo: ^2.3.0
-  typescript: ^5.6.0
+  tsup: ^9.0.0
+  turbo: ^2.11.10
+  typescript: ^7.0.2
   vitest: ^2.1.0
