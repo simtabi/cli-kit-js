@@ -2,7 +2,7 @@
   "name": "@simtabi/cli-kit-js-monorepo",
   "version": "0.0.0",
   "private": true,
-  "description": "Workspace root for @simtabi/cli-kit-js — the JavaScript implementation of the cli-kit family",
+  "description": "Workspace root for @simtabi/cli-kit-js \u2014 the JavaScript implementation of the cli-kit family",
   "license": "MIT",
   "author": "Simtabi",
   "homepage": "https://github.com/simtabi/cli-kit-js",
@@ -15,7 +15,7 @@
   },
   "type": "module",
   "engines": {
-    "node": ">=22.0.0",
+    "node": ">=22.23.4",
     "pnpm": ">=9.0.0"
   },
   "packageManager": "pnpm@9.15.0",

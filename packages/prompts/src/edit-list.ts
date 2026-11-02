@@ -36,7 +36,13 @@ export async function editList(opts: EditListPromptOptions): Promise<readonly st
   if (!io.isTTY) {
     io.write(`${message} `)
     const line = (await io.readLine(signal ?? new AbortController().signal)).trim()
-    const items = line.length === 0 ? [] : line.split(separator).map((s) => s.trim()).filter(Boolean)
+    const items =
+      line.length === 0
+        ? []
+        : line
+            .split(separator)
+            .map((s) => s.trim())
+            .filter(Boolean)
     if (items.length < min) throw new Error(`at least ${min} required, got ${items.length}`)
     if (items.length > max) throw new Error(`at most ${max} allowed, got ${items.length}`)
     if (validate) {

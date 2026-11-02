@@ -10,7 +10,12 @@ catalog:
   "@biomejs/biome": ^1.9.0
   "@changesets/cli": ^2.27.0
   "@commitlint/cli": ^19.0.0
-  "@microsoft/api-extractor": ^7.47.0
+  # Ceiling, not a pin: 7.60.1 bundles TypeScript 6.0.3 and cannot follow the `NodeJS`
+  # global namespace, which packages/io and packages/ansi expose in their public API.
+  # It fails with "Internal Error: Unable to follow symbol for \"NodeJS\"" and reports
+  # itself as a software defect. Measured 2026-11-02: 7.58.7 (TypeScript 5.9.3) passes
+  # locally, 7.60.1 fails in CI on the same source. Raise the ceiling once upstream fixes it.
+  "@microsoft/api-extractor": ">=7.58.7 <7.60.0"
   "@commitlint/config-conventional": ^19.0.0
   "@types/node": ^22.0.0
   "@vitest/coverage-v8": ^2.1.0

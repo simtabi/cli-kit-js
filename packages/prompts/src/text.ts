@@ -12,7 +12,14 @@
  */
 
 import { colors } from '@simtabi/cli-kit-js-ansi'
-import { glyphs, isBackspaceKey, isCancelKey, isEnterKey, isPrintable, throwIfAborted } from './render'
+import {
+  glyphs,
+  isBackspaceKey,
+  isCancelKey,
+  isEnterKey,
+  isPrintable,
+  throwIfAborted,
+} from './render'
 import { createPromptRenderer } from './renderer'
 import { PromptCancelledError, type TextPromptOptions } from './types'
 

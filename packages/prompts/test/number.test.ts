@@ -1,6 +1,6 @@
 import { MemoryAdapter, answer } from '@simtabi/cli-kit-js-testing'
 import { describe, expect, it } from 'vitest'
-import { number, PromptCancelledError } from '../src/index'
+import { PromptCancelledError, number } from '../src/index'
 
 function tty(): MemoryAdapter {
   return new MemoryAdapter({ isTTY: true, color: 24 })
@@ -51,7 +51,8 @@ describe('number prompt', () => {
 
   it('rejects out-of-range Enter and re-prompts', async () => {
     const io = tty()
-    answer(io,
+    answer(
+      io,
       { name: '1', raw: '1' },
       'enter', // 1 < min 5 → error
       { name: '0', raw: '0' },

@@ -14,7 +14,8 @@ interface State {
 describe('wizard', () => {
   it('runs steps in order and returns aggregated state', async () => {
     const io = tty()
-    answer(io,
+    answer(
+      io,
       // text: my-app
       { name: 'm', raw: 'm' },
       { name: 'y', raw: 'y' },
@@ -49,7 +50,8 @@ describe('wizard', () => {
 
   it('when() skips steps', async () => {
     const io = tty()
-    answer(io,
+    answer(
+      io,
       // select kind: cli (down + enter)
       { name: 'down' },
       'enter',
@@ -90,12 +92,7 @@ describe('wizard', () => {
 
   it('next() jumps to specific step', async () => {
     const io = tty()
-    answer(io,
-      { name: 'a', raw: 'a' },
-      'enter',
-      { name: 'c', raw: 'c' },
-      'enter',
-    )
+    answer(io, { name: 'a', raw: 'a' }, 'enter', { name: 'c', raw: 'c' }, 'enter')
     const result = await wizard({
       io,
       steps: [
@@ -121,10 +118,7 @@ describe('wizard', () => {
 
   it('next() returning false ends the wizard', async () => {
     const io = tty()
-    answer(io,
-      { name: 'a', raw: 'a' },
-      'enter',
-    )
+    answer(io, { name: 'a', raw: 'a' }, 'enter')
     const result = await wizard({
       io,
       steps: [

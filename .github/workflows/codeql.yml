@@ -25,11 +25,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [javascript-typescript]
+        # `actions` was only ever scanned by GitHub's default setup, which cannot coexist with
+        # this advanced configuration -- so taking the advanced one back means scanning
+        # workflows here instead. It is the language that finds script injection and
+        # unpinned-action defects, which this repository had 52 of.
+        language: [javascript-typescript, actions]
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@v7
 
-      - uses: github/codeql-action/init@4e828ff8d448a8a6e532957b1811f387a63867e8 # v3.27.4
+      - uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           queries: security-and-quality
@@ -38,6 +42,6 @@ jobs:
               - legacy
               - docs
 
-      - uses: github/codeql-action/analyze@4e828ff8d448a8a6e532957b1811f387a63867e8 # v3.27.4
+      - uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"

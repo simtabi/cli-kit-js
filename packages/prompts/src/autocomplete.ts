@@ -33,9 +33,7 @@ import {
   type SelectOption,
 } from './types'
 
-export async function autocomplete<T = string>(
-  opts: AutocompletePromptOptions<T>,
-): Promise<T> {
+export async function autocomplete<T = string>(opts: AutocompletePromptOptions<T>): Promise<T> {
   const { io, message, source, signal } = opts
   const maxResults = opts.maxResults ?? 8
   throwIfAborted(signal)
@@ -162,9 +160,7 @@ async function loadSource<T>(
   if (Array.isArray(source)) {
     const q = query.toLowerCase()
     if (q.length === 0) return source as readonly SelectOption<T>[]
-    return (source as readonly SelectOption<T>[]).filter((o) =>
-      o.label.toLowerCase().includes(q),
-    )
+    return (source as readonly SelectOption<T>[]).filter((o) => o.label.toLowerCase().includes(q))
   }
   if (typeof source === 'function') {
     return await (source as (q: string) => Promise<readonly SelectOption<T>[]>)(query)

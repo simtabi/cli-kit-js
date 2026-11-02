@@ -9,7 +9,8 @@ function tty(): MemoryAdapter {
 describe('form prompt', () => {
   it('collects text + number + confirm in order', async () => {
     const io = tty()
-    answer(io,
+    answer(
+      io,
       // text: "hi"
       { name: 'h', raw: 'h' },
       { name: 'i', raw: 'i' },
@@ -35,7 +36,8 @@ describe('form prompt', () => {
 
   it('select + multiselect work via form', async () => {
     const io = tty()
-    answer(io,
+    answer(
+      io,
       // select: pick b
       { name: 'down' },
       'enter',
@@ -76,12 +78,7 @@ describe('form prompt', () => {
 
   it('cross-field validate throws', async () => {
     const io = tty()
-    answer(io,
-      { name: '5', raw: '5' },
-      'enter',
-      { name: '3', raw: '3' },
-      'enter',
-    )
+    answer(io, { name: '5', raw: '5' }, 'enter', { name: '3', raw: '3' }, 'enter')
     await expect(
       form({
         io,
