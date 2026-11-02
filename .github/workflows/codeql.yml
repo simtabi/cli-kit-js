@@ -25,7 +25,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [javascript-typescript]
+        # `actions` was only ever scanned by GitHub's default setup, which cannot coexist with
+        # this advanced configuration -- so taking the advanced one back means scanning
+        # workflows here instead. It is the language that finds script injection and
+        # unpinned-action defects, which this repository had 52 of.
+        language: [javascript-typescript, actions]
     steps:
       - uses: actions/checkout@v7
 
