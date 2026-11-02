@@ -17,7 +17,7 @@ catalog:
   # locally, 7.60.1 fails in CI on the same source. Raise the ceiling once upstream fixes it.
   "@microsoft/api-extractor": ">=7.58.7 <7.60.0"
   "@commitlint/config-conventional": ^19.0.0
-  "@types/node": ^22.0.0
+  "@types/node": ^26.6.6
   "@vitest/coverage-v8": ^2.1.0
   fast-check: ^3.23.0
   jsdom: ^25.0.0
