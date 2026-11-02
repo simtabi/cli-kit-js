@@ -3,7 +3,11 @@ import { defineConfig } from 'astro/config'
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://cli-kit-js.pages.dev',
+  // GitHub Pages, like the rest of the estate. A project site is served from
+  // /<repo>/, so `base` is required: without it every generated link, the sitemap
+  // and the canonical URLs all point at the domain root.
+  site: 'https://simtabi.github.io',
+  base: '/cli-kit-js',
   integrations: [
     starlight({
       title: 'cli-kit-js',

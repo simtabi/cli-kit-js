@@ -114,7 +114,7 @@ XSS-safe by default — every consumer character is HTML-escaped before reaching
 
 ## Documentation
 
-- **[docs site](https://cli-kit-js.pages.dev)** (Starlight, deployed to Cloudflare Pages) — guides, per-package API, concepts.
+- **[docs site](https://simtabi.github.io/cli-kit-js)** (Starlight, published to GitHub Pages) — guides, per-package API, concepts.
 - [`THREAT-MODEL.md`](./THREAT-MODEL.md) — full security posture and per-adversary defence mapping.
 - [`SECURITY.md`](./SECURITY.md) — disclosure policy.
 - [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) — release-time runbook.
@@ -125,7 +125,7 @@ XSS-safe by default — every consumer character is HTML-escaped before reaching
 ## Apps
 
 - [`apps/examples`](./apps/examples) — Node example CLIs.
-- [`apps/playground`](./apps/playground) — Vite browser playground showing the DOM adapter rendering box / table / tree / progress / spinner. Deployed to Cloudflare Pages.
+- [`apps/playground`](./apps/playground) — Vite browser playground showing the DOM adapter rendering box / table / tree / progress / spinner. Published to GitHub Pages at [/playground/](https://simtabi.github.io/cli-kit-js/playground/).
 - [`docs`](./docs) — Starlight site source.
 
 ## Security
