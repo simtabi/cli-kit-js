@@ -5,7 +5,9 @@
   "description": "Performance benchmarks for cli-kit-js. Not published.",
   "license": "MIT",
   "type": "module",
-  "engines": { "node": ">=22.0.0" },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "bench": "node --experimental-strip-types ./run.ts",
     "bench:parser": "node --experimental-strip-types ./parser.ts",
@@ -28,7 +30,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "tinybench": "^3.0.0",
+    "tinybench": "^6.2.2",
     "typescript": "catalog:"
   }
 }
