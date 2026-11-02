@@ -119,7 +119,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - run: pnpm install
-      - run: pnpm audit --audit-level=high --prod
+      # `pnpm audit` reads the lockfile and refuses without one
+      # (ERR_PNPM_AUDIT_NO_LOCKFILE), and this repository tracks no lockfile by policy. So
+      # one is computed here, in the runner's disposable checkout, and never committed: the
+      # rule is about what the repository tracks, not about what a job computes and throws
+      # away. Deleting this job instead would have removed a security control to satisfy a
+      # rule about file tracking.
+      - name: Audit the production tree against an ephemeral lockfile
+        run: |
+          sed -i '/^package-lock=false$/d' .npmrc
+          pnpm install --lockfile-only
+          pnpm audit --audit-level=high --prod
 
   api-surface:
     name: API surface (api-extractor)
