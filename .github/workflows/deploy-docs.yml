@@ -10,7 +10,6 @@ on:
       - 'SECURITY.md'
       - 'SECURITY-CHECKLIST.md'
       - 'README.md'
-      - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
       - '.github/workflows/deploy-docs.yml'
   pull_request:
@@ -45,9 +44,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
 
       - name: Build docs site
         run: pnpm --filter @simtabi/cli-kit-js-docs build

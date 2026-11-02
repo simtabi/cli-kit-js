@@ -31,8 +31,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
       - run: pnpm build
       - name: Check bundle sizes against per-package budgets
         # size-limit configs land in each package's package.json during M2-M4.
