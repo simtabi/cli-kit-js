@@ -11,7 +11,7 @@
  *   - Idempotent: re-running with the same `--from`/`--to` is a no-op
  */
 
-import { defineCommand, run, type Plugin } from '@simtabi/cli-kit-js'
+import { type Plugin, defineCommand, run } from '@simtabi/cli-kit-js'
 import { colors } from '@simtabi/cli-kit-js/ansi'
 import { box, progressBar } from '@simtabi/cli-kit-js/render'
 
@@ -90,7 +90,9 @@ const migrate = defineCommand({
       await new Promise((r) => setTimeout(r, 80))
       if (!args.dryRun) tx.applied.push(v)
       const done = v - args.from
-      io.write(`\r${progressBar(done, total, { width: 32, label: `v${v - 1} → v${v}`, showPercent: true })}`)
+      io.write(
+        `\r${progressBar(done, total, { width: 32, label: `v${v - 1} → v${v}`, showPercent: true })}`,
+      )
     }
     io.write('\n')
 

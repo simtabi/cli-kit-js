@@ -1,6 +1,6 @@
 import { MemoryAdapter, answer } from '@simtabi/cli-kit-js-testing'
 import { describe, expect, it } from 'vitest'
-import { autocomplete, PromptCancelledError } from '../src/index'
+import { PromptCancelledError, autocomplete } from '../src/index'
 
 function tty(): MemoryAdapter {
   return new MemoryAdapter({ isTTY: true, color: 24 })
@@ -26,21 +26,13 @@ describe('autocomplete prompt', () => {
 
   it('filters by substring as the user types', async () => {
     const io = tty()
-    answer(io,
-      { name: 'e', raw: 'e' },
-      { name: 'a', raw: 'a' },
-      'enter',
-    )
+    answer(io, { name: 'e', raw: 'e' }, { name: 'a', raw: 'a' }, 'enter')
     expect(await autocomplete({ io, message: 'r?', source: opts })).toBe('us-east-1')
   })
 
   it('arrow down moves through filtered list', async () => {
     const io = tty()
-    answer(io,
-      { name: 'w', raw: 'w' },
-      { name: 'down' },
-      'enter',
-    )
+    answer(io, { name: 'w', raw: 'w' }, { name: 'down' }, 'enter')
     expect(await autocomplete({ io, message: 'r?', source: opts })).toBe('us-west-2')
   })
 
@@ -54,10 +46,7 @@ describe('autocomplete prompt', () => {
 
   it('async source: filtered by query', async () => {
     const io = tty()
-    answer(io,
-      { name: 'e', raw: 'e' },
-      'enter',
-    )
+    answer(io, { name: 'e', raw: 'e' }, 'enter')
     const source = async (q: string) => {
       const items = opts.filter((o) => o.label.includes(q))
       return items

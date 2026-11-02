@@ -1,6 +1,6 @@
 import { MemoryAdapter, answer } from '@simtabi/cli-kit-js-testing'
 import { describe, expect, it } from 'vitest'
-import { editList, PromptCancelledError } from '../src/index'
+import { PromptCancelledError, editList } from '../src/index'
 
 function tty(): MemoryAdapter {
   return new MemoryAdapter({ isTTY: true, color: 24 })
@@ -9,19 +9,14 @@ function tty(): MemoryAdapter {
 describe('editList prompt', () => {
   it('builds an array, ends on empty Enter', async () => {
     const io = tty()
-    answer(io,
-      { name: 'a', raw: 'a' },
-      'enter',
-      { name: 'b', raw: 'b' },
-      'enter',
-      'enter',
-    )
+    answer(io, { name: 'a', raw: 'a' }, 'enter', { name: 'b', raw: 'b' }, 'enter', 'enter')
     expect(await editList({ io, message: 'tags' })).toEqual(['a', 'b'])
   })
 
   it('backspace at empty buffer pops the last item back into the buffer', async () => {
     const io = tty()
-    answer(io,
+    answer(
+      io,
       { name: 'a', raw: 'a' },
       'enter',
       'backspace',
@@ -34,7 +29,8 @@ describe('editList prompt', () => {
 
   it('rejects finishing under min', async () => {
     const io = tty()
-    answer(io,
+    answer(
+      io,
       'enter', // empty → error (need ≥ 1)
       { name: 'a', raw: 'a' },
       'enter',
@@ -45,7 +41,8 @@ describe('editList prompt', () => {
 
   it('rejects adding past max', async () => {
     const io = tty()
-    answer(io,
+    answer(
+      io,
       { name: 'a', raw: 'a' },
       'enter', // add 'a' → items=['a']
       { name: 'b', raw: 'b' },
@@ -58,7 +55,8 @@ describe('editList prompt', () => {
 
   it('validate rejects bad items', async () => {
     const io = tty()
-    answer(io,
+    answer(
+      io,
       { name: 'A', raw: 'A' },
       'enter', // uppercase → fail
       'backspace',

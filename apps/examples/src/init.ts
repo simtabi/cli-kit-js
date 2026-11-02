@@ -55,7 +55,8 @@ const init = defineCommand({
             kind: 'text',
             message: 'Service name?',
             default: 'svc',
-            validate: (v) => (/^[a-z][a-z0-9-]{1,40}$/.test(v) ? true : 'lowercase, digits, hyphens'),
+            validate: (v) =>
+              /^[a-z][a-z0-9-]{1,40}$/.test(v) ? true : 'lowercase, digits, hyphens',
           },
           {
             name: 'region',
@@ -78,8 +79,7 @@ const init = defineCommand({
             message: 'Tags (Enter twice to finish)',
             min: 0,
             max: 8,
-            validate: (v) =>
-              /^[a-z0-9:_-]+$/.test(v) ? true : 'lowercase, digits, : _ -',
+            validate: (v) => (/^[a-z0-9:_-]+$/.test(v) ? true : 'lowercase, digits, : _ -'),
           },
           {
             name: 'enableHttps',

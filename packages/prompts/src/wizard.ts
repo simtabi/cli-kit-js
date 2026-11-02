@@ -72,7 +72,11 @@ export async function wizard<S extends Record<string, unknown> = Record<string, 
     io.write(`${counter} `)
 
     try {
-      const value = await step.prompt({ io, state: state as S, ...(signal !== undefined && { signal }) })
+      const value = await step.prompt({
+        io,
+        state: state as S,
+        ...(signal !== undefined && { signal }),
+      })
       state[step.id] = value
       stack.push(i)
     } catch (err) {

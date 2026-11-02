@@ -75,7 +75,8 @@ export async function number(opts: NumberPromptOptions): Promise<number> {
         throw new PromptCancelledError()
       }
       if (isEnterKey(key)) {
-        const value = buffer.length > 0 ? parseNumber(buffer, integer) : (opts.default ?? Number.NaN)
+        const value =
+          buffer.length > 0 ? parseNumber(buffer, integer) : (opts.default ?? Number.NaN)
         const bounds = validateBounds(value, { min, max, integer })
         if (bounds !== true) {
           error = bounds
