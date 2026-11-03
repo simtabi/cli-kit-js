@@ -49,6 +49,9 @@
   "pnpm": {
     "overrides": {
       "@microsoft/api-extractor>minimatch": "^11.0.1"
+    },
+    "patchedDependencies": {
+      "tsup@9.0.0": "patches/tsup@9.0.0.patch"
     }
   }
 }
