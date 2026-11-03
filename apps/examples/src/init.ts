@@ -16,7 +16,7 @@
 
 import { defineCommand, run } from '@simtabi/cli-kit-js'
 import { colors } from '@simtabi/cli-kit-js/ansi'
-import { PromptCancelledError, form, outro } from '@simtabi/cli-kit-js/prompts'
+import { form, outro, PromptCancelledError } from '@simtabi/cli-kit-js/prompts'
 import { box } from '@simtabi/cli-kit-js/render'
 
 const regions = [

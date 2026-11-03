@@ -1,7 +1,6 @@
 import { defineCommand, run } from '@simtabi/cli-kit-js-core'
 import { describe, expect, it } from 'vitest'
 import {
-  MemoryAdapter,
   answer,
   expectExitCode,
   expectNoStdout,
@@ -9,6 +8,7 @@ import {
   expectStderr,
   expectStdout,
   freezeTime,
+  MemoryAdapter,
   snapshotHelp,
   withEnv,
 } from '../src/index'

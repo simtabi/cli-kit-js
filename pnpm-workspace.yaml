@@ -7,7 +7,7 @@ packages:
 # Centralized dev-dep versions. Reference via "catalog:" in package.json.
 # Bump versions here, every package picks them up.
 catalog:
-  "@biomejs/biome": ^1.9.0
+  "@biomejs/biome": ^2.6.4
   "@changesets/cli": ^3.0.3
   "@commitlint/cli": ^21.2.4
   # Ceiling, not a pin: 7.60.1 bundles TypeScript 6.0.3 and cannot follow the `NodeJS`

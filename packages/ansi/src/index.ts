@@ -5,6 +5,7 @@
  * detection. Pure functions, zero dependencies, browser-safe.
  */
 
+export { colors, createColors } from './colors'
 export {
   detectCapabilities,
   detectColorDepth,
@@ -12,8 +13,6 @@ export {
   detectHyperlinks,
   detectUnicode,
 } from './detect'
-
-export { colors, createColors } from './colors'
 
 export { sanitize, strip } from './sanitize'
 

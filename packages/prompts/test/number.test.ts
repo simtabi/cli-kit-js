@@ -1,6 +1,6 @@
-import { MemoryAdapter, answer } from '@simtabi/cli-kit-js-testing'
+import { answer, MemoryAdapter } from '@simtabi/cli-kit-js-testing'
 import { describe, expect, it } from 'vitest'
-import { PromptCancelledError, number } from '../src/index'
+import { number, PromptCancelledError } from '../src/index'
 
 function tty(): MemoryAdapter {
   return new MemoryAdapter({ isTTY: true, color: 24 })

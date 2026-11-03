@@ -6,10 +6,10 @@
  */
 
 export { createConfig, createConfigFromLayers } from './config'
+export { JsonSizeError, PollutionError, safeParse } from './json'
+export { type LayerData, loadLayers } from './loader'
+export { cloneNull, deepFreeze, redactSensitive } from './redact'
 export { defineSchema, findFieldDef, getDefaults, walkSchema } from './schema'
-export { safeParse, JsonSizeError, PollutionError } from './json'
-export { redactSensitive, deepFreeze, cloneNull } from './redact'
-export { loadLayers, type LayerData } from './loader'
 
 export type {
   AuditEntry,

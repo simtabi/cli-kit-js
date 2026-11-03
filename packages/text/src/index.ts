@@ -6,13 +6,13 @@
  * cluster segmentation.
  */
 
-export { codepointWidth, width } from './width'
 export {
   align,
-  pad,
-  truncate,
-  wrap,
   type PadSide,
+  pad,
   type TruncateOptions,
+  truncate,
   type WrapOptions,
+  wrap,
 } from './manipulate'
+export { codepointWidth, width } from './width'

@@ -9,24 +9,24 @@
  * are reported in the outcome as `BAD_DEFINITION`.
  */
 
-export { parse } from './parse'
 export {
-  isAllowedKey,
-  nullObject,
-  safeSet,
-} from './keys'
-export {
+  type CoerceResult,
   coerceBoolean,
   coerceForType,
   coerceInteger,
   coerceNumber,
   isEnumValid,
-  type CoerceResult,
 } from './coerce'
 export {
-  DEFAULT_CAPS,
+  isAllowedKey,
+  nullObject,
+  safeSet,
+} from './keys'
+export { parse } from './parse'
+export {
   type ArgDef,
   type ArgType,
+  DEFAULT_CAPS,
   type ParseError,
   type ParseErrorCode,
   type ParseOptions,

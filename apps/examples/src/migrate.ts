@@ -11,7 +11,7 @@
  *   - Idempotent: re-running with the same `--from`/`--to` is a no-op
  */
 
-import { type Plugin, defineCommand, run } from '@simtabi/cli-kit-js'
+import { defineCommand, type Plugin, run } from '@simtabi/cli-kit-js'
 import { colors } from '@simtabi/cli-kit-js/ansi'
 import { box, progressBar } from '@simtabi/cli-kit-js/render'
 

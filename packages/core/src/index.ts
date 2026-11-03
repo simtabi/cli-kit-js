@@ -6,26 +6,33 @@
  * subcommands, and "did you mean?" suggestions.
  */
 
-export { defineCommand, cli, type CommandBuilder } from './define'
-export { run } from './run'
-export { renderHelp, type HelpFormat, type RenderHelpOptions } from './help'
-export { suggest } from './suggest'
+// Re-export the parser's public types so consumers get the full surface from
+// a single import.
+export type {
+  ArgDef,
+  ArgType,
+  ParseError,
+  ParseErrorCode,
+} from '@simtabi/cli-kit-js-parser'
+export { type CommandBuilder, cli, defineCommand } from './define'
+export { type HelpFormat, type RenderHelpOptions, renderHelp } from './help'
 export { HookBus } from './hooks'
 export { isLazyCommand, resolveSubCommand } from './lazy'
 export {
-  DEFAULT_REDACT_KEYS,
-  createLogger,
-  redactFields,
   type CreateLoggerOptions,
-  type LogLevel,
+  createLogger,
+  DEFAULT_REDACT_KEYS,
   type Logger,
+  type LogLevel,
+  redactFields,
 } from './logger'
-
+export { run } from './run'
+export { suggest } from './suggest'
 export type {
   ArgsRecord,
   Command,
-  CommandMeta,
   CommandLike,
+  CommandMeta,
   HookEvent,
   HookHandler,
   HookPayloads,
@@ -37,12 +44,3 @@ export type {
   RunResult,
   SubCommands,
 } from './types'
-
-// Re-export the parser's public types so consumers get the full surface from
-// a single import.
-export type {
-  ArgDef,
-  ArgType,
-  ParseError,
-  ParseErrorCode,
-} from '@simtabi/cli-kit-js-parser'
