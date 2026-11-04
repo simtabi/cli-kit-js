@@ -14,11 +14,11 @@
 import { defineCommand, run } from '@simtabi/cli-kit-js'
 import { colors } from '@simtabi/cli-kit-js/ansi'
 import {
-  PromptCancelledError,
   confirm,
   multiselect,
   number,
   outro,
+  PromptCancelledError,
   password,
   select,
   text,

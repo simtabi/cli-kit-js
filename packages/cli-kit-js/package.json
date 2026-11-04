@@ -117,6 +117,7 @@
     "@microsoft/api-extractor": "catalog:",
     "@types/node": "catalog:",
     "tsup": "catalog:",
+    "@typescript/typescript6": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

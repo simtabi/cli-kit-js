@@ -2,8 +2,7 @@
  * Sensitive-value redaction for snapshots and logs.
  */
 
-import { walkSchema } from './schema'
-import { getPath, setPath } from './schema'
+import { getPath, setPath, walkSchema } from './schema'
 import type { Schema } from './types'
 
 const REDACTED = '[REDACTED]'

@@ -293,7 +293,7 @@ function clamp255(n: number): number {
   return Math.floor(n)
 }
 
-const CLASS_RE = /[^a-zA-Z0-9_\-]/g
+const CLASS_RE = /[^a-zA-Z0-9_-]/g
 
 function sanitizeClassName(name: string): string {
   return name.replace(CLASS_RE, '').slice(0, 64)

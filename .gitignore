@@ -60,3 +60,8 @@ config/local.json
 # Astro / docs
 docs/.astro/
 docs/dist/
+
+# Lock files are never tracked (org rule). .npmrc already sets package-lock=false,
+# but the audit job strips that line to compute an ephemeral lockfile, and anyone
+# reproducing it locally would otherwise leave a committable pnpm-lock.yaml behind.
+pnpm-lock.yaml

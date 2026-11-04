@@ -1,4 +1,4 @@
-import { MemoryAdapter, answer } from '@simtabi/cli-kit-js-testing'
+import { answer, MemoryAdapter } from '@simtabi/cli-kit-js-testing'
 import { describe, expect, it } from 'vitest'
 import { PromptCancelledError, text } from '../src/index'
 

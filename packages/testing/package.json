@@ -68,6 +68,7 @@
     "@types/node": "catalog:",
     "size-limit": "catalog:",
     "tsup": "catalog:",
+    "@typescript/typescript6": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

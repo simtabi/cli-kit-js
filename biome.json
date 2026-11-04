@@ -1,20 +1,24 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true
   },
   "files": {
-    "ignore": [
-      "dist",
-      "build",
-      ".turbo",
-      "coverage",
-      "node_modules",
-      "legacy",
-      "docs/.astro",
-      "**/*.snap"
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/build",
+      "!**/.turbo",
+      "!**/coverage",
+      "!**/node_modules",
+      "!**/legacy",
+      "!**/docs/.astro",
+      "!**/*.snap",
+      "!**/*.md",
+      "!**/*.yml",
+      "!**/*.yaml"
     ]
   },
   "formatter": {
@@ -38,12 +42,15 @@
     "parser": {
       "allowComments": true,
       "allowTrailingCommas": false
+    },
+    "formatter": {
+      "expand": "auto"
     }
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "noForEach": "off"
       },
@@ -62,13 +69,16 @@
         "useNodejsImportProtocol": "error",
         "useShorthandFunctionType": "error",
         "useTemplate": "error",
-        "noNonNullAssertion": "error"
+        "noNonNullAssertion": "error",
+        "noProcessEnv": "off"
       },
       "suspicious": {
         "noExplicitAny": "error",
         "noConsole": {
           "level": "warn",
-          "options": { "allow": ["error", "warn"] }
+          "options": {
+            "allow": ["error", "warn"]
+          }
         },
         "noEmptyBlockStatements": "error",
         "noControlCharactersInRegex": "off"
@@ -77,17 +87,20 @@
         "noDelete": "off"
       },
       "nursery": {
-        "noProcessEnv": "off",
         "useExplicitType": "off"
       }
     }
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   },
   "overrides": [
     {
-      "include": ["bench/**/*.ts"],
+      "includes": ["**/bench/**/*.ts"],
       "linter": {
         "rules": {
           "suspicious": {

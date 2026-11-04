@@ -12,8 +12,8 @@
  *   `@simtabi/cli-kit-js-io/console` — Browser DevTools adapter (M6)
  */
 
-export { createNodeStdio, type NodeStdioAdapterOptions } from './node'
 export { MemoryAdapter, type MemoryAdapterOptions } from './memory'
+export { createNodeStdio, type NodeStdioAdapterOptions } from './node'
 export { SignalController, type SignalControllerOptions } from './signals'
 export { TerminalGuard, type TerminalGuardOptions } from './terminal-guard'
 export type { IOAdapter, KeyEvent, OutputRegion, ResizeListener } from './types'

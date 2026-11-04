@@ -19,6 +19,7 @@
  */
 
 import {
+  createNodeStdio,
   EXIT_ERROR,
   EXIT_SIGHUP,
   EXIT_SIGINT,
@@ -27,7 +28,6 @@ import {
   type IOAdapter,
   SignalController,
   TerminalGuard,
-  createNodeStdio,
 } from '@simtabi/cli-kit-js-io'
 import { type ParseError, parse } from '@simtabi/cli-kit-js-parser'
 import { type HelpFormat, renderHelp } from './help'
@@ -163,8 +163,8 @@ async function runInternal(
 
   // 5. Run setup → run → cleanup
   await bus.emit('before:run', { ctx })
-  let runError: unknown = undefined
-  let runResult: unknown = undefined
+  let runError: unknown
+  let runResult: unknown
   try {
     if (command.setup) await command.setup(ctx)
     if (signal.aborted) return cancelledFromSignal(signal)

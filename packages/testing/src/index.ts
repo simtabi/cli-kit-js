@@ -11,14 +11,14 @@
 export { MemoryAdapter, type MemoryAdapterOptions } from '@simtabi/cli-kit-js-io'
 
 export { answer } from './answer'
+export { withEnv } from './env'
 export {
+  type ExpectOptions,
   expectExitCode,
   expectNoStdout,
   expectResultType,
   expectStderr,
   expectStdout,
-  type ExpectOptions,
 } from './expect'
 export { snapshotHelp } from './snapshot'
 export { freezeTime } from './time'
-export { withEnv } from './env'

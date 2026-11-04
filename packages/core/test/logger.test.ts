@@ -1,6 +1,6 @@
 import { MemoryAdapter } from '@simtabi/cli-kit-js-io'
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_REDACT_KEYS, createLogger, redactFields } from '../src/index'
+import { createLogger, DEFAULT_REDACT_KEYS, redactFields } from '../src/index'
 
 describe('createLogger: leveled output', () => {
   it('emits info and above at info level', () => {

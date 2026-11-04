@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { parse } from '../src/index'
 import type { ArgDef } from '../src/index'
+import { parse } from '../src/index'
 
 const def = <T extends ArgDef>(d: T): T => d
 

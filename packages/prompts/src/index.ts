@@ -11,27 +11,21 @@
  */
 
 export { autocomplete } from './autocomplete'
+// Display-only chrome helpers (use inside wizards / forms).
+export { intro, note, outro, rail } from './chrome'
 export { confirm } from './confirm'
 export { editList } from './edit-list'
 export { form } from './form'
 export { multiselect } from './multiselect'
 export { number } from './number'
 export { password } from './password'
-export { select } from './select'
-export { text } from './text'
-export { wizard } from './wizard'
-
-// Display-only chrome helpers (use inside wizards / forms).
-export { intro, note, outro, rail } from './chrome'
-
 // Renderer primitive — power users who want to compose custom prompts.
-export { createPromptRenderer, countNewlines, type PromptRenderer } from './renderer'
-
+export { countNewlines, createPromptRenderer, type PromptRenderer } from './renderer'
 // SecureString is exported for consumers writing custom credential prompts.
 export { SecureString } from './secure-string'
-
+export { select } from './select'
+export { text } from './text'
 export {
-  PromptCancelledError,
   type AutocompletePromptOptions,
   type AutocompleteSource,
   type ConfirmPromptOptions,
@@ -42,6 +36,7 @@ export {
   type NumberPromptOptions,
   type PasswordPromptOptions,
   type PromptBase,
+  PromptCancelledError,
   type SelectOption,
   type SelectPromptOptions,
   type TextPromptOptions,
@@ -50,3 +45,4 @@ export {
   type WizardOptions,
   type WizardStep,
 } from './types'
+export { wizard } from './wizard'

@@ -20,6 +20,6 @@
     "astro": "^7.4.4"
   },
   "devDependencies": {
-    "typescript": "catalog:"
+    "typescript": "catalog:docs"
   }
 }
