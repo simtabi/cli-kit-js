@@ -1,6 +1,6 @@
 {
   "name": "@simtabi/cli-kit-js-parser",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "argv → typed parsed args. Mri-compatible parser with bug fixes, prototype-pollution defense, and DoS caps.",
   "license": "MIT",
   "author": "Simtabi",

@@ -1,6 +1,6 @@
 {
   "name": "@simtabi/cli-kit-js-io",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "IOAdapter interface + Node, DOM, DevTools console, and Memory implementations. Single abstraction over stdin/stdout/stderr across runtimes.",
   "license": "MIT",
   "author": "Simtabi",

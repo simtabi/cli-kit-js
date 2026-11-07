@@ -1,6 +1,6 @@
 {
   "name": "@simtabi/cli-kit-js-ansi",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "SGR colors, strip, and capability detection. Zero deps. Honors NO_COLOR, FORCE_COLOR, isTTY, COLORTERM.",
   "license": "MIT",
   "author": "Simtabi",

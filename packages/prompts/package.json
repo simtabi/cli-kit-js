@@ -1,6 +1,6 @@
 {
   "name": "@simtabi/cli-kit-js-prompts",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Interactive prompts: text, password, confirm, select, multiselect. Raw-mode TTY + non-TTY readLine fallback.",
   "license": "MIT",
   "author": "Simtabi",

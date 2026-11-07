@@ -1,6 +1,6 @@
 {
   "name": "@simtabi/cli-kit-js-text",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Width-safe text utilities: truncate, wrap, pad, align. Handles ANSI styling, CJK wide chars, emoji, ZWJ, combining marks.",
   "license": "MIT",
   "author": "Simtabi",
