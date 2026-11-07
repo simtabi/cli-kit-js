@@ -1,6 +1,6 @@
 {
   "name": "@simtabi/cli-kit-js-core",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Command definition, runner, lifecycle, AbortSignal wiring, hook bus, logger. The async-correct heart of cli-kit-js.",
   "license": "MIT",
   "author": "Simtabi",

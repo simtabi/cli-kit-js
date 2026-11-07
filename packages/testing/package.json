@@ -1,6 +1,6 @@
 {
   "name": "@simtabi/cli-kit-js-testing",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Memory adapters, prompt drivers, snapshot helpers, deterministic-time / env utilities for testing cli-kit-js apps.",
   "license": "MIT",
   "author": "Simtabi",

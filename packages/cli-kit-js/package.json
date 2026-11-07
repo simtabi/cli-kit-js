@@ -1,6 +1,6 @@
 {
   "name": "@simtabi/cli-kit-js",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A safe, fluent, zero-runtime-dependency CLI and rendering toolkit for Node, Deno, Bun, and the browser. Meta-package re-exporting the cli-kit-js family.",
   "license": "MIT",
   "author": "Simtabi",

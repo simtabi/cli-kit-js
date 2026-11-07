@@ -1,6 +1,6 @@
 {
   "name": "@simtabi/cli-kit-js-config",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Layered config: defaults → config/*.{env}.json → env vars → CLI args → runtime overrides. Schema-validated, prototype-pollution-safe.",
   "license": "MIT",
   "author": "Simtabi",

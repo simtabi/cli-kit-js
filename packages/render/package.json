@@ -1,6 +1,6 @@
 {
   "name": "@simtabi/cli-kit-js-render",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Box, table, list, tree, banner, progress bar, spinner, and ANSI→HTML rendering. Width-safe, theme-aware, IOAdapter-driven.",
   "license": "MIT",
   "author": "Simtabi",
