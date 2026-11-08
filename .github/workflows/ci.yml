@@ -61,6 +61,48 @@ jobs:
           print(f"{seen} action references in {len(files)} workflow files; {len(bad)} off the rule")
           sys.exit(1 if bad else 0)
           PINS
+      # An action that opens a pull request must not be handed the built-in GITHUB_TOKEN:
+      # such a pull request starts no workflows, so its checks never report and a required
+      # check can never be satisfied. Measured 2026-11-08 on #27 -- five CI workflows stuck
+      # at `action_required`, GitGuardian the only check that reported. The guard refuses to
+      # pass when it finds no pull-request-opening action at all, because a clean result and
+      # a matcher that has stopped matching look identical otherwise.
+      - name: A pull-request-opening action never gets the built-in token
+        run: |
+          python3 - <<'TOKENS'
+          import os, re, sys
+          d = ".github/workflows"
+          files = sorted(f for f in os.listdir(d) if f.endswith((".yml", ".yaml")))
+          floor = 10
+          if len(files) < floor:
+              sys.exit(f"{len(files)} workflow files in {d}; floor is {floor}. "
+                       "A search that stops matching must fail, not report a clean repository.")
+          # An action that OPENS a pull request must not get the built-in token: a pull request
+          # opened with GITHUB_TOKEN starts no workflows, so its checks never report and a
+          # required one can never be satisfied. Mint a Refresh Bot token instead.
+          OPENERS = ("changesets/action", "peter-evans/create-pull-request")
+          step = re.compile(r"^[ \t]*-[ \t]+(?:name|uses|id|run):", re.M)
+          bad, found = [], 0
+          for name in files:
+              text = open(os.path.join(d, name)).read()
+              marks = [m.start() for m in step.finditer(text)] + [len(text)]
+              for i, s in enumerate(marks[:-1]):
+                  block = text[s:marks[i + 1]]
+                  m = re.search(r"uses:\s*([\w.-]+/[\w./-]+)@", block)
+                  if not m or not m.group(1).startswith(OPENERS):
+                      continue
+                  found += 1
+                  if "secrets.GITHUB_TOKEN" in block:
+                      bad.append(f"{name}: {m.group(1)} is handed secrets.GITHUB_TOKEN -- the pull "
+                                 "request it opens starts no CI; use a Refresh Bot app token")
+          if not found:
+              sys.exit("no pull-request-opening action found in any workflow; this guard has "
+                       "stopped matching and is reporting success for that reason")
+          print("\n".join(f"  {b}" for b in bad))
+          print(f"{found} pull-request-opening reference(s) in {len(files)} workflow files; "
+                f"{len(bad)} off the rule")
+          sys.exit(1 if bad else 0)
+          TOKENS
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           version: ${{ env.PNPM_VERSION }}
