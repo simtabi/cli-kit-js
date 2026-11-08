@@ -80,19 +80,26 @@ jobs:
           # An action that OPENS a pull request must not get the built-in token: a pull request
           # opened with GITHUB_TOKEN starts no workflows, so its checks never report and a
           # required one can never be satisfied. Mint a Refresh Bot token instead.
-          OPENERS = ("changesets/action", "peter-evans/create-pull-request")
-          step = re.compile(r"^[ \t]*-[ \t]+(?:name|uses|id|run):", re.M)
+          OPENERS = ("changesets/action", "peter-evans/create-pull-request",
+                     "gr2m/create-or-update-pull-request-action")
+          # A step is bounded by the next list item at the SAME or shallower indent -- not by the
+          # key it happens to start with. A step may open with `- if:`, and keying on `- uses:`
+          # silently mis-bounds it, which is how this guard first read 2 of 3 real call sites.
+          item = re.compile(r"^([ \t]*)-[ \t]+", re.M)
           bad, found = [], 0
           for name in files:
               text = open(os.path.join(d, name)).read()
-              marks = [m.start() for m in step.finditer(text)] + [len(text)]
-              for i, s in enumerate(marks[:-1]):
-                  block = text[s:marks[i + 1]]
-                  m = re.search(r"uses:\s*([\w.-]+/[\w./-]+)@", block)
-                  if not m or not m.group(1).startswith(OPENERS):
+              items = [(m.start(), len(m.group(1))) for m in item.finditer(text)]
+              for m in re.finditer(r"uses:[ \t]*([\w.-]+/[\w./-]+)@", text):
+                  if not m.group(1).startswith(OPENERS):
                       continue
+                  starts = [p for p in items if p[0] <= m.start()]
+                  if not starts:
+                      continue
+                  pos, indent = starts[-1]
+                  end = next((p for p, i in items if p > pos and i <= indent), len(text))
                   found += 1
-                  if "secrets.GITHUB_TOKEN" in block:
+                  if "secrets.GITHUB_TOKEN" in text[pos:end]:
                       bad.append(f"{name}: {m.group(1)} is handed secrets.GITHUB_TOKEN -- the pull "
                                  "request it opens starts no CI; use a Refresh Bot app token")
           if not found:
