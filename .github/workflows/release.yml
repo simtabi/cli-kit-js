@@ -47,6 +47,24 @@ jobs:
 
       - run: pnpm test
 
+      # A pull request opened with the built-in GITHUB_TOKEN starts no workflows, so the
+      # "Version Packages" PR never reports a check and can never satisfy a required one.
+      # Measured 2026-11-08 on #27: its five CI workflows all sat at `action_required`
+      # and the only check that reported was GitGuardian. Mint a Refresh Bot token instead.
+      #
+      # This step fails closed. If the org values go missing the release stops here rather
+      # than opening another PR that cannot be gated -- which is the right way round.
+      # The same step fails in simtabi/repo-templates because that repo is PRIVATE and, on
+      # GitHub Free, a private repo cannot read org-level vars or secrets. cli-kit-js is
+      # public, so it reads both.
+      - uses: actions/create-github-app-token@v3
+        id: app
+        with:
+          client-id: ${{ vars.REFRESH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.REFRESH_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
       - name: Create Release PR or Publish
         id: changesets
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
@@ -58,7 +76,7 @@ jobs:
           pr-title: "chore: version packages"
           create-github-releases: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app.outputs.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
 
